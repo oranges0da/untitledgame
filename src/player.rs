@@ -3,6 +3,9 @@ use bevy::prelude::*;
 pub const PLAYER_SIZE: f32 = 4.; // factor to enlarge the player sprite
 
 #[derive(Component)]
+pub struct Player {}
+
+#[derive(Component)]
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
@@ -28,13 +31,16 @@ fn spawn_player(
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
-    commands.spawn(SpriteSheetBundle {
-        texture_atlas: texture_atlas_handle,
-        sprite: TextureAtlasSprite {
-            index: 4, // index of which sprite to spawn in sheet
+    commands.spawn((
+        SpriteSheetBundle {
+            texture_atlas: texture_atlas_handle,
+            sprite: TextureAtlasSprite {
+                index: 4, // index of which sprite to spawn in sheet
+                ..default()
+            },
+            transform: Transform::from_scale(Vec3::new(PLAYER_SIZE, PLAYER_SIZE, 0.)), // make sprite bigger by a factor of PLAYER_SIZE
             ..default()
         },
-        transform: Transform::from_scale(Vec3::new(PLAYER_SIZE, PLAYER_SIZE, 0.)), // make sprite bigger by a factor of PLAYER_SIZE
-        ..default()
-    });
+        Player {},
+    ));
 }
