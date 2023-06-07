@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::animation;
+
 const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
 const PLAYER_SPEED: f32 = 100.;
 
@@ -22,8 +24,14 @@ fn spawn_player(
 ) {
     // load spritesheet and split into grid of individual sprites
     let texture_handle = asset_server.load("player_idle.png");
-    let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(25., 15.), 4, 1, None, None);
+    let texture_atlas = TextureAtlas::from_grid(
+        texture_handle,
+        Vec2::new(20., 15.),
+        4,
+        1,
+        Some(Vec2::new(10., 0.)),
+        Some(Vec2::new(0., 0.)),
+    );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     commands.spawn((
@@ -37,6 +45,11 @@ fn spawn_player(
             ..default()
         },
         Player {},
+        animation::SpriteAnimation {
+            len: 3,
+            frame_time: 1. / 2.5,
+        },
+        animation::FrameTime(0.),
     ));
 }
 
@@ -50,22 +63,18 @@ fn move_player(
         let mut direction = Vec3::ZERO;
 
         if keyboard_input.pressed(KeyCode::W) || keyboard_input.pressed(KeyCode::Up) {
-            info!("Up is pressed");
             direction += Vec3::new(0., 1., 0.);
         }
 
         if keyboard_input.pressed(KeyCode::S) || keyboard_input.pressed(KeyCode::Down) {
-            info!("Up is pressed");
             direction += Vec3::new(0., -1., 0.);
         }
 
         if keyboard_input.pressed(KeyCode::A) || keyboard_input.pressed(KeyCode::Left) {
-            info!("Up is pressed");
             direction += Vec3::new(-1., 0., 0.);
         }
 
         if keyboard_input.pressed(KeyCode::D) || keyboard_input.pressed(KeyCode::Right) {
-            info!("Up is pressed");
             direction += Vec3::new(1., 0., 0.);
         }
 

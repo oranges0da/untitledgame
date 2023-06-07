@@ -1,7 +1,7 @@
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
 use bevy::window::PresentMode;
 
+mod animation;
 mod player;
 
 fn main() {
@@ -24,9 +24,8 @@ fn main() {
                 }),
         )
         // show framerate in console for debug
-        .add_plugin(LogDiagnosticsPlugin::default())
-        .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .add_plugin(player::PlayerPlugin)
+        .add_plugin(animation::AnimationPlugin)
         .add_startup_system(setup)
         .run();
 }
