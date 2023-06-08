@@ -23,13 +23,13 @@ fn spawn_player(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     // load spritesheet and split into grid of individual sprites
-    let texture_handle = asset_server.load("player_idle.png");
+    let texture_handle = asset_server.load("spritesheet.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
-        Vec2::new(20., 15.),
+        Vec2::new(30., 15.),
         4,
-        1,
-        Some(Vec2::new(10., 0.)),
+        5,
+        Some(Vec2::new(0., 1.)),
         Some(Vec2::new(0., 0.)),
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
@@ -47,7 +47,7 @@ fn spawn_player(
         Player {},
         animation::SpriteAnimation {
             len: 3,
-            frame_time: 1. / 2.5,
+            frame_time: 1. / 2.,
         },
         animation::FrameTime(0.),
     ));
