@@ -19,7 +19,6 @@ pub struct SpriteAnimation {
     pub len: usize,
     pub frame_time: f32,
 }
-
 #[derive(Component, Debug)]
 pub struct FrameTime(pub f32);
 
@@ -44,9 +43,9 @@ impl PlayerAnimations {
     }
 }
 
-// init PlayerAnimations resource with from_world with animation data
+// init PlayerAnimations resource with from_world and add animation data
 impl FromWorld for PlayerAnimations {
-    fn from_world(world: &mut World) -> Self {
+    fn from_world(_world: &mut World) -> Self {
         let mut map = PlayerAnimations {
             map: HashMap::new(),
         };
@@ -72,6 +71,7 @@ impl FromWorld for PlayerAnimations {
     }
 }
 
+// fundamental animation logic, will be the same for any animation implemented
 fn animate_player(
     mut animation: Query<(
         &mut TextureAtlasSprite,
@@ -81,10 +81,6 @@ fn animate_player(
     time: Res<Time>,
 ) {
     for (mut sprite, animation, mut frame_time) in animation.iter_mut() {
-        if sprite.index < animation.starting_index {
-            sprite.index = animation.starting_index;
-        }
-
         // get time elapsed (f32) since last frame
         frame_time.0 += time.delta_seconds();
 
@@ -98,18 +94,19 @@ fn animate_player(
                 sprite.index += animation.starting_index;
             }
 
-            // subtract total frames from frame_time as to not accumulate
+            // subtract total frames from frame_time as to not accumulate in frame_time
             frame_time.0 -= animation.frame_time * frames_elapsed as f32;
         }
     }
 }
 
+// change global PlayerAnimation resource to desired SpriteAnimation
 fn change_animation(
     mut player: Query<(&mut SpriteAnimation, &mut FrameTime), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     animations: Res<PlayerAnimations>,
 ) {
-    let (mut sprite_animation, mut frame_time) = player.single_mut();
+    let (mut sprite_animation, mut _frame_time) = player.single_mut();
 
     let set_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
         Animation::Run
