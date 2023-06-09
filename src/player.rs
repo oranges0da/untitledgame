@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::animation;
 
-const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
+const PLAYER_SIZE: f32 = 5.; // factor to enlarge the player sprite
 const PLAYER_SPEED: f32 = 100.;
 
 #[derive(Component)]
@@ -26,10 +26,10 @@ fn spawn_player(
     let texture_handle = asset_server.load("spritesheet.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
-        Vec2::new(30., 15.),
+        Vec2::new(30., 16.),
         4,
         5,
-        Some(Vec2::new(0., 1.)),
+        Some(Vec2::new(0., 0.)),
         Some(Vec2::new(0., 0.)),
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
@@ -46,8 +46,8 @@ fn spawn_player(
         },
         Player {},
         animation::SpriteAnimation {
-            len: 3,
-            frame_time: 1. / 2.,
+            len: 0,
+            frame_time: 0.3, // the greater this number, the greater time there will be between frames; therefore slower animation
         },
         animation::FrameTime(0.),
     ));
@@ -61,14 +61,6 @@ fn move_player(
     // getting mutable player_transform property for every SINGLE frame (get_single_mut makes sense now.)
     if let Ok(mut player_pos) = player_transform.get_single_mut() {
         let mut direction = Vec3::ZERO;
-
-        if keyboard_input.pressed(KeyCode::W) || keyboard_input.pressed(KeyCode::Up) {
-            direction += Vec3::new(0., 1., 0.);
-        }
-
-        if keyboard_input.pressed(KeyCode::S) || keyboard_input.pressed(KeyCode::Down) {
-            direction += Vec3::new(0., -1., 0.);
-        }
 
         if keyboard_input.pressed(KeyCode::A) || keyboard_input.pressed(KeyCode::Left) {
             direction += Vec3::new(-1., 0., 0.);
