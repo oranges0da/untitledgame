@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::animation;
 
-const PLAYER_SIZE: f32 = 5.; // factor to enlarge the player sprite
+const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
 const PLAYER_SPEED: f32 = 100.;
 
 #[derive(Component)]
@@ -21,6 +21,7 @@ fn spawn_player(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    animation_res: Res<animation::PlayerAnimations>,
 ) {
     // load spritesheet and split into grid of individual sprites
     let texture_handle = asset_server.load("spritesheet.png");
@@ -33,6 +34,7 @@ fn spawn_player(
         Some(Vec2::new(0., 0.)),
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let Some(animation) = animation_res.get(animation::Animation::Idle) else {error!("Failed to find animation: Idle"); return;};
 
     commands.spawn((
         SpriteSheetBundle {
@@ -45,10 +47,7 @@ fn spawn_player(
             ..default()
         },
         Player {},
-        animation::SpriteAnimation {
-            len: 0,
-            frame_time: 0.3, // the greater this number, the greater time there will be between frames; therefore slower animation
-        },
+        animation,
         animation::FrameTime(0.),
     ));
 }
