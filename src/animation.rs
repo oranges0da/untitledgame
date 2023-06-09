@@ -102,17 +102,39 @@ fn animate_player(
 
 // change global PlayerAnimation resource to desired SpriteAnimation
 fn change_animation(
-    mut player: Query<(&mut SpriteAnimation, &mut FrameTime), With<Player>>,
+    mut player: Query<
+        (
+            &mut TextureAtlasSprite,
+            &mut SpriteAnimation,
+            &mut FrameTime,
+        ),
+        With<Player>,
+    >,
     keyboard_input: Res<Input<KeyCode>>,
     animations: Res<PlayerAnimations>,
 ) {
-    let (mut sprite_animation, mut _frame_time) = player.single_mut();
+    let (mut sprite, mut sprite_animation, mut _frame_time) = player.single_mut();
 
-    let set_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
-        Animation::Run
-    } else {
-        Animation::Idle
-    };
+    // flip sprite on x axis when going from left to right, or vice-verse
+    if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
+        sprite.flip_x = true;
+    } else if keyboard_input.any_just_pressed([KeyCode::D, KeyCode::Right])
+        && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
+    {
+        sprite.flip_x = false;
+    } else if keyboard_input.any_just_released([KeyCode::A, KeyCode::Left])
+        && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
+        && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
+    {
+        sprite.flip_x = false;
+    }
+
+    let set_animation =
+        if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left]) {
+            Animation::Run
+        } else {
+            Animation::Idle
+        };
 
     // get SpriteAnimation data from Animation enum
     let Some(new_animation) = animations.get(set_animation) else {return ();};
