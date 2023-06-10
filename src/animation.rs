@@ -1,6 +1,6 @@
 use crate::player::Player;
 use bevy::prelude::*;
-use rand::prelude::*;
+use rand::Rng;
 use std::collections::HashMap;
 
 #[derive(Component)]
@@ -56,7 +56,7 @@ impl FromWorld for PlayerAnimations {
             SpriteAnimation {
                 starting_index: 4,
                 len: 3,
-                frame_time: 0.5,
+                frame_time: 1.,
             },
         );
         map.add(
@@ -89,7 +89,7 @@ fn animate_player(
             let frames_elapsed = (frame_time.0 / animation.frame_time) as usize;
             sprite.index += frames_elapsed;
 
-            // if sprite index becomes greater than length of total animation frames, reset sprite index with modulus
+            // if sprite index becomes greater than length of total animation frames, reset sprite index
             if sprite.index - animation.starting_index >= animation.len {
                 sprite.index %= animation.len;
                 sprite.index += animation.starting_index;

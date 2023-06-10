@@ -23,7 +23,6 @@ fn main() {
                     ..default()
                 }),
         )
-        // show framerate in console for debug
         .add_plugin(player::PlayerPlugin)
         .add_plugin(animation::AnimationPlugin)
         .add_startup_system(setup)
