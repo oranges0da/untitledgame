@@ -54,15 +54,15 @@ impl FromWorld for PlayerAnimations {
             Animation::Idle,
             SpriteAnimation {
                 starting_index: 4,
-                len: 4,
+                len: 3,
                 frame_time: 0.5,
             },
         );
         map.add(
             Animation::Run,
             SpriteAnimation {
-                starting_index: 8,
-                len: 8,
+                starting_index: 9,
+                len: 7,
                 frame_time: 0.3,
             },
         );
@@ -110,18 +110,22 @@ fn change_animation(
         ),
         With<Player>,
     >,
+    mut player_query: Query<&mut Transform, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     animations: Res<PlayerAnimations>,
 ) {
     let (mut sprite, mut sprite_animation, mut _frame_time) = player.single_mut();
+    let mut player_transform = player_query.single_mut();
 
     // flip sprite on x axis when going from left to right, or vice-verse
     if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
         sprite.flip_x = true;
+        player_transform.translation.x += 35.; // offset x by player width
     } else if keyboard_input.any_just_pressed([KeyCode::D, KeyCode::Right])
         && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
     {
         sprite.flip_x = false;
+        player_transform.translation.x -= 35.;
     } else if keyboard_input.any_just_released([KeyCode::A, KeyCode::Left])
         && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
         && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
