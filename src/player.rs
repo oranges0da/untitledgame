@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::animation;
 
 const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
-const PLAYER_SPEED: f32 = 100.;
+const PLAYER_SPEED: f32 = 250.;
 
 #[derive(Component)]
 pub struct Player {}
