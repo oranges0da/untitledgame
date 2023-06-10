@@ -1,5 +1,6 @@
 use crate::player::Player;
 use bevy::prelude::*;
+use rand::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Component)]
