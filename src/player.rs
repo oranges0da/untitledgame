@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::animation;
 
 const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
-const PLAYER_SPEED: f32 = 250.;
+const PLAYER_SPEED: f32 = 250.; // factor to multiply translation
 
 #[derive(Component)]
 pub struct Player {}
@@ -54,11 +54,11 @@ fn spawn_player(
 
 fn move_player(
     keyboard_input: Res<Input<KeyCode>>,
-    mut player_transform: Query<&mut Transform, With<Player>>,
+    mut player_query: Query<&mut Transform, With<Player>>,
     time: Res<Time>,
 ) {
     // getting mutable player_transform property for every SINGLE frame (get_single_mut makes sense now.)
-    if let Ok(mut player_pos) = player_transform.get_single_mut() {
+    if let Ok(mut player_pos) = player_query.get_single_mut() {
         let mut direction = Vec3::ZERO;
 
         if keyboard_input.pressed(KeyCode::A) || keyboard_input.pressed(KeyCode::Left) {
@@ -79,4 +79,10 @@ fn move_player(
     } else {
         info!("Could not parse player_transform");
     }
+}
+
+fn player_jump(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut player_query: Query<&mut Transform, With<Player>>,
+) {
 }
