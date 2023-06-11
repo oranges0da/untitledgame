@@ -46,8 +46,6 @@ impl PlayerAnimations {
 // init PlayerAnimations resource with from_world and add animation data
 impl FromWorld for PlayerAnimations {
     fn from_world(_world: &mut World) -> Self {
-        let mut rng = rand::thread_rng();
-
         let mut map = PlayerAnimations {
             map: HashMap::new(),
         };
@@ -56,15 +54,15 @@ impl FromWorld for PlayerAnimations {
             Animation::Idle,
             SpriteAnimation {
                 starting_index: 4,
-                len: 4,
-                frame_time: 1.,
+                len: 5,
+                frame_time: 0.5,
             },
         );
         map.add(
             Animation::Run,
             SpriteAnimation {
                 starting_index: 8,
-                len: 8,
+                len: 7,
                 frame_time: 0.25,
             },
         );
