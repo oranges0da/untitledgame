@@ -4,7 +4,9 @@ use crate::animation;
 
 const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
 const PLAYER_SPEED: f32 = 250.; // factor to multiply translation
+
 const JUMP_POWER: f32 = 2.;
+const FALL_POWER: f32 = 4.;
 
 #[derive(Component)]
 pub struct Player {}
@@ -16,7 +18,8 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(spawn_player)
             .add_system(move_player)
-            .add_system(player_jump);
+            .add_system(player_jump)
+            .add_system(player_fall);
     }
 }
 
@@ -97,6 +100,17 @@ fn player_jump(
 
         if player_transform.translation.y < -50. {
             player_transform.translation.y = -50.;
+        }
+    }
+}
+
+fn player_fall(
+    mut player_query: Query<&mut Transform, With<Player>>,
+    keyboard_input: Res<Input<KeyCode>>,
+) {
+    if let Ok(mut player_transform) = player_query.get_single_mut() {
+        if keyboard_input.any_pressed([KeyCode::Down, KeyCode::S]) {
+            player_transform.translation.y -= 1. * FALL_POWER;
         }
     }
 }
