@@ -26,6 +26,7 @@ pub struct FrameTime(pub f32);
 pub enum Animation {
     Idle,
     Run,
+    Jump,
 }
 
 #[derive(Resource)]
@@ -63,7 +64,16 @@ impl FromWorld for PlayerAnimations {
             SpriteAnimation {
                 starting_index: 8,
                 len: 7,
-                frame_time: 0.25,
+                frame_time: 0.16,
+            },
+        );
+
+        map.add(
+            Animation::Jump,
+            SpriteAnimation {
+                starting_index: 1,
+                len: 3,
+                frame_time: 0.5,
             },
         );
 
@@ -136,6 +146,8 @@ fn change_animation(
     let set_animation =
         if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left]) {
             Animation::Run
+        } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
+            Animation::Jump
         } else {
             Animation::Idle
         };

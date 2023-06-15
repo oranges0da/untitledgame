@@ -4,6 +4,7 @@ use crate::animation;
 
 const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
 const PLAYER_SPEED: f32 = 250.; // factor to multiply translation
+const JUMP_POWER: f32 = 2.;
 
 #[derive(Component)]
 pub struct Player {}
@@ -13,7 +14,9 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player).add_system(move_player);
+        app.add_startup_system(spawn_player)
+            .add_system(move_player)
+            .add_system(player_jump);
     }
 }
 
@@ -82,7 +85,18 @@ fn move_player(
 }
 
 fn player_jump(
-    keyboard_input: Res<Input<KeyCode>>,
     mut player_query: Query<&mut Transform, With<Player>>,
+    keyboard_input: Res<Input<KeyCode>>,
 ) {
+    if let Ok(mut player_transform) = player_query.get_single_mut() {
+        if keyboard_input.any_pressed([KeyCode::Up, KeyCode::W]) {
+            player_transform.translation.y += 1. * JUMP_POWER;
+        } else {
+            player_transform.translation.y -= 1.;
+        }
+
+        if player_transform.translation.y < -50. {
+            player_transform.translation.y = -50.;
+        }
+    }
 }
