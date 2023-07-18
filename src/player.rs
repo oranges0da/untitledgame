@@ -19,14 +19,15 @@ impl Plugin for PlayerPlugin {
         app.add_startup_system(spawn_player)
             .add_system(move_player)
             .add_system(player_jump)
-            .add_system(player_fall);
+            .add_system(player_fall)
+            .add_system(ground_detection);
     }
 }
 
 fn spawn_player(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    asset_server: Res<AssetServer>,
     animation_res: Res<animation::PlayerAnimations>,
 ) {
     // load spritesheet and split into grid of individual sprites
@@ -59,8 +60,8 @@ fn spawn_player(
 }
 
 fn move_player(
-    keyboard_input: Res<Input<KeyCode>>,
     mut player_query: Query<&mut Transform, With<Player>>,
+    keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
     // getting mutable player_transform property for every SINGLE frame (get_single_mut makes sense now.)
@@ -97,10 +98,6 @@ fn player_jump(
         } else {
             player_transform.translation.y -= 1.;
         }
-
-        if player_transform.translation.y < -50. {
-            player_transform.translation.y = -50.;
-        }
     }
 }
 
@@ -112,5 +109,13 @@ fn player_fall(
         if keyboard_input.any_pressed([KeyCode::Down, KeyCode::S]) {
             player_transform.translation.y -= 1. * FALL_POWER;
         }
+    }
+}
+
+fn ground_detection(mut player_query: Query<&mut Transform, With<Player>>) {
+    let Ok(mut player_transform) = player_query.get_single_mut() else {return;};
+
+    if player_transform.translation.y < -50. {
+        player_transform.translation.y = -50.;
     }
 }
