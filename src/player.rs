@@ -93,19 +93,17 @@ fn move_player(
 struct Jump(f32);
 
 fn player_jump(
-    mut commands: Commands,
-    mut player: Query<(Entity, &mut Transform, &mut Jump), With<Player>>,
+    mut player: Query<(&mut Transform, &mut Jump), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    let Ok((player, mut transform, mut jump)) = player.get_single_mut() else { return; };
-    let jump_power: f32 = (time.delta_seconds() * JUMP_SPEED * 2.);
-    info!("{:?}", jump_power);
+    let Ok((mut player_transform, mut jump)) = player.get_single_mut() else { return; };
+    let jump_power: f32 = time.delta_seconds() * JUMP_SPEED * 2.;
 
     jump.0 -= jump_power;
 
     if keyboard_input.any_pressed([KeyCode::W, KeyCode::Space, KeyCode::Up]) {
-        transform.translation.y += jump_power;
+        player_transform.translation.y += jump_power;
     }
 }
 
