@@ -5,8 +5,8 @@ use crate::animation;
 const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
 const PLAYER_SPEED: f32 = 250.; // factor to multiply translation
 
-const JUMP_POWER: f32 = 2.;
-const FALL_POWER: f32 = 4.;
+const JUMP_SPEED: f32 = 99.;
+const FALL_SPEED: f32 = 99.;
 
 #[derive(Component)]
 pub struct Player {}
@@ -56,6 +56,7 @@ fn spawn_player(
         Player {},
         animation,
         animation::FrameTime(0.),
+        Jump(100.),
     ));
 }
 
@@ -88,26 +89,36 @@ fn move_player(
     }
 }
 
+#[derive(Component)]
+struct Jump(f32);
+
 fn player_jump(
-    mut player_query: Query<&mut Transform, With<Player>>,
+    mut commands: Commands,
+    mut player: Query<(Entity, &mut Transform, &mut Jump), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
+    time: Res<Time>,
 ) {
-    if let Ok(mut player_transform) = player_query.get_single_mut() {
-        if keyboard_input.any_pressed([KeyCode::Up, KeyCode::W]) {
-            player_transform.translation.y += 1. * JUMP_POWER;
-        } else {
-            player_transform.translation.y -= 1.;
-        }
+    let Ok((player, mut transform, mut jump)) = player.get_single_mut() else { return; };
+    let jump_power: f32 = (time.delta_seconds() * JUMP_SPEED * 2.);
+    info!("{:?}", jump_power);
+
+    jump.0 -= jump_power;
+
+    if keyboard_input.any_pressed([KeyCode::W, KeyCode::Space, KeyCode::Up]) {
+        transform.translation.y += jump_power;
     }
 }
 
 fn player_fall(
     mut player_query: Query<&mut Transform, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
+    time: Res<Time>,
 ) {
     if let Ok(mut player_transform) = player_query.get_single_mut() {
-        if keyboard_input.any_pressed([KeyCode::Down, KeyCode::S]) {
-            player_transform.translation.y -= 1. * FALL_POWER;
+        let fall_power: f32 = FALL_SPEED * time.delta_seconds();
+
+        if !keyboard_input.any_pressed([KeyCode::Up, KeyCode::W, KeyCode::Space]) {
+            player_transform.translation.y -= fall_power;
         }
     }
 }
