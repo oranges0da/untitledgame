@@ -5,8 +5,8 @@ use crate::animation;
 const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
 const PLAYER_SPEED: f32 = 250.; // factor to multiply translation
 
-const JUMP_SPEED: f32 = 99.;
-const FALL_SPEED: f32 = 99.;
+const JUMP_SPEED: f32 = 100.;
+const FALL_SPEED: f32 = 150.;
 
 #[derive(Component)]
 pub struct Player {}
@@ -98,11 +98,15 @@ fn player_jump(
     time: Res<Time>,
 ) {
     let Ok((mut player_transform, mut jump)) = player.get_single_mut() else { return; };
+
+    // acceleration
     let jump_power: f32 = time.delta_seconds() * JUMP_SPEED * 2.;
 
     jump.0 -= jump_power;
 
-    if keyboard_input.any_pressed([KeyCode::W, KeyCode::Space, KeyCode::Up]) {
+    if keyboard_input.any_pressed([KeyCode::W, KeyCode::Space, KeyCode::Up])
+        && player_transform.translation.y < 50.
+    {
         player_transform.translation.y += jump_power;
     }
 }
@@ -113,9 +117,11 @@ fn player_fall(
     time: Res<Time>,
 ) {
     if let Ok(mut player_transform) = player_query.get_single_mut() {
-        let fall_power: f32 = FALL_SPEED * time.delta_seconds();
+        let fall_power: f32 = FALL_SPEED * time.delta_seconds() * 2.;
 
-        if !keyboard_input.any_pressed([KeyCode::Up, KeyCode::W, KeyCode::Space]) {
+        if !keyboard_input.any_pressed([KeyCode::Up, KeyCode::W, KeyCode::Space])
+            && player_transform.translation.y < 100.
+        {
             player_transform.translation.y -= fall_power;
         }
     }
