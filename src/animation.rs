@@ -153,19 +153,18 @@ fn change_animation(
         sprite.flip_x = false;
     }
 
-    let curr_animation =
-        if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
+    let curr_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
+            // to not play running animation when pressing jump and left or right at same time
             && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
-        // to not play running animation when pressing jump and left or right at same time
-        {
-            Animation::Run
-        } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
-            Animation::Jump
-        } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
-            Animation::Fall
-        } else {
-            Animation::Idle
-        };
+    {
+        Animation::Run
+    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
+        Animation::Jump
+    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
+        Animation::Fall
+    } else {
+        Animation::Idle
+    };
 
     // get SpriteAnimation data from Animation enum and set accordingly (this is very jerry-rigged for now.)
     let Some(new_animation) = animations.get(curr_animation) else {return ();};

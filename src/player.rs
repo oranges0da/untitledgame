@@ -1,15 +1,12 @@
+use crate::animation;
 use bevy::prelude::*;
 
-use crate::animation;
-
-const PLAYER_SIZE: f32 = 3.; // factor to enlarge the player sprite
-const PLAYER_SPEED: f32 = 250.; // factor to multiply translation
-
-const JUMP_SPEED: f32 = 100.;
-const FALL_SPEED: f32 = 150.;
-
 #[derive(Component)]
-pub struct Player {}
+pub struct Player {
+    speed: f32, // movement speed of player on screen
+    jump_speed: f32,
+    fall_speed: f32, // how quickly player falls
+}
 
 #[derive(Component)]
 pub struct PlayerPlugin;
@@ -19,6 +16,7 @@ impl Plugin for PlayerPlugin {
         app.add_startup_system(spawn_player)
             .add_system(move_player)
             .add_system(player_jump)
+            .add_system(double_jump)
             .add_system(player_fall)
             .add_system(ground_detection);
     }
@@ -50,10 +48,14 @@ fn spawn_player(
                 index: 0, // index of which sprite to spawn in sheet
                 ..default()
             },
-            transform: Transform::from_scale(Vec3::new(PLAYER_SIZE, PLAYER_SIZE, 0.)), // make sprite bigger by a factor of PLAYER_SIZE
+            transform: Transform::from_scale(Vec3::new(3., 3., 0.)), // make sprite bigger by a factor of PLAYER_SIZE
             ..default()
         },
-        Player {},
+        Player {
+            speed: 250.,
+            jump_speed: 200.,
+            fall_speed: 100.,
+        },
         animation,
         animation::FrameTime(0.),
         Jump(100.),
@@ -61,12 +63,11 @@ fn spawn_player(
 }
 
 fn move_player(
-    mut player_query: Query<&mut Transform, With<Player>>,
+    mut player_query: Query<(&Player, &mut Transform), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    // getting mutable player_transform property for every SINGLE frame (get_single_mut makes sense now.)
-    if let Ok(mut player_pos) = player_query.get_single_mut() {
+    if let Ok((player, mut player_pos)) = player_query.get_single_mut() {
         let mut direction = Vec3::ZERO;
 
         if keyboard_input.pressed(KeyCode::A) || keyboard_input.pressed(KeyCode::Left) {
@@ -81,9 +82,9 @@ fn move_player(
             direction = direction.normalize(); // allows sprite to move diagonally
         }
 
-        // setting translation property to our own updated direction vector
+        // setting translation vector to our own updated direction vector
         // delta_seconds returns time elapsed since last frame, used to make movement frame-rate independent
-        player_pos.translation += direction * PLAYER_SPEED * time.delta_seconds();
+        player_pos.translation += direction * player.speed * time.delta_seconds();
     } else {
         info!("Could not parse player_transform");
     }
@@ -93,14 +94,14 @@ fn move_player(
 struct Jump(f32);
 
 fn player_jump(
-    mut player: Query<(&mut Transform, &mut Jump), With<Player>>,
+    mut player: Query<(&Player, &mut Transform, &mut Jump), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    let Ok((mut player_transform, mut jump)) = player.get_single_mut() else { return; };
+    let Ok((player, mut player_transform, mut jump)) = player.get_single_mut() else { return; };
 
     // acceleration
-    let jump_power: f32 = time.delta_seconds() * JUMP_SPEED * 2.;
+    let jump_power: f32 = time.delta_seconds() * player.jump_speed * 2.;
 
     jump.0 -= jump_power;
 
@@ -111,13 +112,33 @@ fn player_jump(
     }
 }
 
-fn player_fall(
-    mut player_query: Query<&mut Transform, With<Player>>,
+fn double_jump(
+    mut player: Query<(&Player, &mut Transform, &mut Jump), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    if let Ok(mut player_transform) = player_query.get_single_mut() {
-        let fall_power: f32 = FALL_SPEED * time.delta_seconds() * 2.;
+    let Ok((player, mut player_transform, mut jump)) = player.get_single_mut() else { return; };
+
+    // acceleration
+    let jump_power: f32 = time.delta_seconds() * player.jump_speed * 2.;
+
+    jump.0 -= jump_power;
+
+    if keyboard_input.any_just_released([KeyCode::W, KeyCode::Space, KeyCode::Up])
+        && player_transform.translation.y < 100.
+        && keyboard_input.any_pressed([KeyCode::W, KeyCode::Space, KeyCode::Up])
+    {
+        player_transform.translation.y += jump_power;
+    }
+}
+
+fn player_fall(
+    mut player_query: Query<(&Player, &mut Transform), With<Player>>,
+    keyboard_input: Res<Input<KeyCode>>,
+    time: Res<Time>,
+) {
+    if let Ok((player, mut player_transform)) = player_query.get_single_mut() {
+        let fall_power: f32 = player.fall_speed * time.delta_seconds() * 2.;
 
         if !keyboard_input.any_pressed([KeyCode::Up, KeyCode::W, KeyCode::Space])
             && player_transform.translation.y < 100.
