@@ -6,6 +6,8 @@ pub struct Player {
     speed: f32, // movement speed of player on screen
     jump_speed: f32,
     fall_speed: f32, // how quickly player falls
+    pub animation: animation::SpriteAnimation,
+    pub frame_time: f32, // compare player frame_time to animation frame_time
 }
 
 #[derive(Component)]
@@ -55,9 +57,9 @@ fn spawn_player(
             speed: 250.,
             jump_speed: 200.,
             fall_speed: 100.,
+            animation,
+            frame_time: 0.6,
         },
-        animation,
-        animation::FrameTime(0.),
         Jump(100.),
     ));
 }

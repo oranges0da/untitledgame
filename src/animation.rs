@@ -9,11 +9,11 @@ impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerAnimations>()
             .add_system(animate_player)
-            .add_system(change_animation);
+            .add_system(change_player_animation);
     }
 }
 
-#[derive(Component, Clone)]
+#[derive(Component, Clone, Debug)]
 pub struct SpriteAnimation {
     pub starting_index: usize,
     pub len: usize,
@@ -22,7 +22,7 @@ pub struct SpriteAnimation {
 #[derive(Component, Debug)]
 pub struct FrameTime(pub f32);
 
-#[derive(Component, Eq, PartialEq, Hash)]
+#[derive(Component, Eq, PartialEq, Hash, Debug)]
 pub enum Animation {
     Idle,
     Run,
@@ -93,49 +93,40 @@ impl FromWorld for PlayerAnimations {
 
 // fundamental animation logic, will be the same for any animation implemented
 fn animate_player(
-    mut animation: Query<(
-        &mut TextureAtlasSprite,
-        &mut SpriteAnimation,
-        &mut FrameTime,
-    )>,
+    mut player_query: Query<(&mut Player, &mut TextureAtlasSprite)>, // cannot include TextureAtlasSprite in Player{} due to the way Bevy renders entities
     time: Res<Time>,
 ) {
-    for (mut sprite, animation, mut frame_time) in animation.iter_mut() {
+    for (mut player, mut sprite) in player_query.iter_mut() {
         // get time elapsed (f32) since last frame
-        frame_time.0 += time.delta_seconds();
+        player.frame_time += time.delta_seconds();
 
-        if frame_time.0 > animation.frame_time {
-            let frames_elapsed = (frame_time.0 / animation.frame_time) as usize;
+        if player.frame_time > player.animation.frame_time {
+            let frames_elapsed = (player.frame_time / player.animation.frame_time) as usize;
             sprite.index += frames_elapsed;
 
             // if sprite index becomes greater than length of total animation frames, reset sprite index
-            if sprite.index - animation.starting_index >= animation.len {
-                sprite.index %= animation.len;
-                sprite.index += animation.starting_index;
+            if sprite.index - player.animation.starting_index >= player.animation.len {
+                sprite.index %= player.animation.len;
+                sprite.index += player.animation.starting_index;
             }
 
             // subtract total frames from frame_time as to not accumulate in frame_time
-            frame_time.0 -= animation.frame_time * frames_elapsed as f32;
+            player.frame_time -= player.animation.frame_time * frames_elapsed as f32;
         }
     }
 }
 
-// change global PlayerAnimation resource to desired SpriteAnimation
-fn change_animation(
-    mut player: Query<
-        (
-            &mut TextureAtlasSprite,
-            &mut SpriteAnimation,
-            &mut FrameTime,
-        ),
-        With<Player>,
-    >,
-    mut player_query: Query<&mut Transform, With<Player>>,
+// change animation component attached Player entity to desired SpriteAnimation
+fn change_player_animation(
+    mut player: Query<&mut Player>,
+    mut player_sprite: Query<&mut TextureAtlasSprite, With<Player>>,
+    mut player_transform_query: Query<&mut Transform, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     animations: Res<PlayerAnimations>,
 ) {
-    let (mut sprite, mut sprite_animation, mut _frame_time) = player.single_mut();
-    let mut player_transform = player_query.single_mut();
+    let mut player = player.single_mut();
+    let mut sprite = player_sprite.single_mut();
+    let mut player_transform = player_transform_query.single_mut();
 
     // flip sprite on x axis when going from left to right, or vice-verse
     if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
@@ -158,7 +149,13 @@ fn change_animation(
             && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
     {
         Animation::Run
+    } else if keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up]) {
+        Animation::Jump
     } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
+        Animation::Jump
+    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
+        && keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right])
+    {
         Animation::Jump
     } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
         Animation::Fall
@@ -168,5 +165,6 @@ fn change_animation(
 
     // get SpriteAnimation data from Animation enum and set accordingly (this is very jerry-rigged for now.)
     let Some(new_animation) = animations.get(curr_animation) else {return ();};
-    *sprite_animation = new_animation;
+    player.animation = new_animation;
+    info!("Current animation: {:?}", player.animation);
 }
