@@ -35,8 +35,8 @@ fn spawn_player(
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
         Vec2::new(30., 16.),
-        4,
-        5,
+        8,
+        9,
         Some(Vec2::new(0., 0.)),
         Some(Vec2::new(0., 0.)),
     );
