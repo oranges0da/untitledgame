@@ -2,7 +2,11 @@ use bevy::prelude::*;
 use bevy::window::PresentMode;
 
 mod animation;
+mod globals;
 mod player;
+
+pub const HEIGHT: f32 = 640.;
+pub const WIDTH: f32 = 480.;
 
 fn main() {
     App::new()
@@ -12,7 +16,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Popcorn Guy".into(),
-                        resolution: (640., 480.).into(),
+                        resolution: (globals::HEIGHT, globals::WIDTH).into(),
                         present_mode: PresentMode::AutoVsync,
                         // Tells wasm to resize the window according to the available canvas
                         fit_canvas_to_parent: true,

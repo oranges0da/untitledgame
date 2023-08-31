@@ -72,11 +72,13 @@ fn move_player(
     if let Ok((player, mut player_pos)) = player_query.get_single_mut() {
         let mut direction = Vec3::ZERO;
 
-        if keyboard_input.pressed(KeyCode::A) || keyboard_input.pressed(KeyCode::Left) {
+        if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
+            && player_pos.translation.x < crate::WIDTH
+        {
             direction += Vec3::new(-1., 0., 0.);
         }
 
-        if keyboard_input.pressed(KeyCode::D) || keyboard_input.pressed(KeyCode::Right) {
+        if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
             direction += Vec3::new(1., 0., 0.);
         }
 
