@@ -1,4 +1,5 @@
 use crate::animation;
+use crate::globals;
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -37,7 +38,7 @@ fn spawn_player(
         Vec2::new(30., 32.),
         9,
         8,
-        Some(Vec2::new(2., 0.)),
+        Some(Vec2::new(2., 0.5)),
         Some(Vec2::new(0., 0.)),
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
@@ -54,9 +55,9 @@ fn spawn_player(
             ..default()
         },
         Player {
-            speed: 250.,
-            jump_speed: 200.,
-            fall_speed: 100.,
+            speed: globals::SPEED,
+            jump_speed: globals::JUMP_SPEED,
+            fall_speed: globals::FALL_SPEED,
             animation,
             frame_time: 0.6,
         },
