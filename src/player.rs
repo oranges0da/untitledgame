@@ -34,10 +34,10 @@ fn spawn_player(
     let texture_handle = asset_server.load("spritesheet.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
-        Vec2::new(30., 16.),
-        8,
+        Vec2::new(30., 32.),
         9,
-        Some(Vec2::new(0., 0.)),
+        8,
+        Some(Vec2::new(2., 0.)),
         Some(Vec2::new(0., 0.)),
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
@@ -50,7 +50,7 @@ fn spawn_player(
                 index: 0, // index of which sprite to spawn in sheet
                 ..default()
             },
-            transform: Transform::from_scale(Vec3::new(3., 3., 0.)), // make sprite bigger by a factor of PLAYER_SIZE
+            transform: Transform::from_scale(Vec3::new(2., 2., 0.)), // make sprite bigger by a factor of PLAYER_SIZE
             ..default()
         },
         Player {

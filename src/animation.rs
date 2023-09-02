@@ -55,16 +55,16 @@ impl FromWorld for PlayerAnimations {
         map.add(
             Animation::Idle,
             SpriteAnimation {
-                starting_index: 4,
-                len: 5,
+                starting_index: 0,
+                len: 2,
                 frame_time: 0.5,
             },
         );
         map.add(
             Animation::Run,
             SpriteAnimation {
-                starting_index: 8,
-                len: 7,
+                starting_index: 27,
+                len: 8,
                 frame_time: 0.16,
             },
         );
@@ -72,8 +72,8 @@ impl FromWorld for PlayerAnimations {
         map.add(
             Animation::Jump,
             SpriteAnimation {
-                starting_index: 1,
-                len: 3,
+                starting_index: 48,
+                len: 2,
                 frame_time: 0.5,
             },
         );
@@ -81,8 +81,8 @@ impl FromWorld for PlayerAnimations {
         map.add(
             Animation::Fall,
             SpriteAnimation {
-                starting_index: 3,
-                len: 1,
+                starting_index: 50,
+                len: 3,
                 frame_time: 1.,
             },
         );
