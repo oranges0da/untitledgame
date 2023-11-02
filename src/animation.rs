@@ -149,7 +149,7 @@ fn change_player_animation(
             && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
     {
         Animation::Run
-    } else if keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up]) {
+    } else if keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
         Animation::Jump
     } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
         Animation::Jump
@@ -158,6 +158,10 @@ fn change_player_animation(
     {
         Animation::Jump
     } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
+        Animation::Fall
+    } else if player_transform.translation.y > -50.
+        && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space])
+    {
         Animation::Fall
     } else {
         Animation::Idle
