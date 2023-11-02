@@ -57,7 +57,7 @@ impl FromWorld for PlayerAnimations {
             SpriteAnimation {
                 starting_index: 0,
                 len: 2,
-                frame_time: 0.5,
+                frame_time: 0.4,
             },
         );
         map.add(
@@ -65,7 +65,7 @@ impl FromWorld for PlayerAnimations {
             SpriteAnimation {
                 starting_index: 27,
                 len: 8,
-                frame_time: 0.16,
+                frame_time: 0.12,
             },
         );
 
@@ -82,7 +82,7 @@ impl FromWorld for PlayerAnimations {
             Animation::Fall,
             SpriteAnimation {
                 starting_index: 50,
-                len: 3,
+                len: 1,
                 frame_time: 1.,
             },
         );
