@@ -19,7 +19,6 @@ impl Plugin for PlayerPlugin {
         app.add_startup_system(spawn_player)
             .add_system(move_player)
             .add_system(player_jump)
-            .add_system(double_jump)
             .add_system(player_fall)
             .add_system(ground_detection);
     }
@@ -112,26 +111,6 @@ fn player_jump(
 
     if keyboard_input.any_pressed([KeyCode::W, KeyCode::Space, KeyCode::Up])
         && player_transform.translation.y < 50.
-    {
-        player_transform.translation.y += jump_power;
-    }
-}
-
-fn double_jump(
-    mut player: Query<(&Player, &mut Transform, &mut Jump), With<Player>>,
-    keyboard_input: Res<Input<KeyCode>>,
-    time: Res<Time>,
-) {
-    let Ok((player, mut player_transform, mut jump)) = player.get_single_mut() else { return; };
-
-    // acceleration
-    let jump_power: f32 = time.delta_seconds() * player.jump_speed * 2.;
-
-    jump.0 -= jump_power;
-
-    if keyboard_input.any_just_released([KeyCode::W, KeyCode::Space, KeyCode::Up])
-        && player_transform.translation.y < 100.
-        && keyboard_input.any_pressed([KeyCode::W, KeyCode::Space, KeyCode::Up])
     {
         player_transform.translation.y += jump_power;
     }
