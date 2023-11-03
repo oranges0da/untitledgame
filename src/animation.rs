@@ -72,9 +72,9 @@ impl FromWorld for PlayerAnimations {
         map.add(
             Animation::Jump,
             SpriteAnimation {
-                starting_index: 48,
+                starting_index: 49,
                 len: 2,
-                frame_time: 0.5,
+                frame_time: 0.2,
             },
         );
 
