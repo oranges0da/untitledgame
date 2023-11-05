@@ -1,3 +1,4 @@
+use crate::globals;
 use crate::player::Player;
 use bevy::prelude::*;
 use std::collections::HashMap;
@@ -146,7 +147,7 @@ fn change_player_animation(
 
     let curr_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
             // to not play running animation when pressing jump and left or right at same time
-            && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
+            && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && player_transform.translation.y == -globals::CEILING
     {
         Animation::Run
     } else if keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
@@ -168,7 +169,9 @@ fn change_player_animation(
     };
 
     // get SpriteAnimation data from Animation enum and set accordingly (this is very jerry-rigged for now.)
-    let Some(new_animation) = animations.get(curr_animation) else {return ();};
+    let Some(new_animation) = animations.get(curr_animation) else {
+        return ();
+    };
     player.animation = new_animation;
     info!("Current animation: {:?}", player.animation);
 }

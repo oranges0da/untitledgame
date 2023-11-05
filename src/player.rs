@@ -41,7 +41,10 @@ fn spawn_player(
         Some(Vec2::new(0., 0.)),
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
-    let Some(animation) = animation_res.get(animation::Animation::Idle) else {error!("Failed to find animation: Idle"); return;};
+    let Some(animation) = animation_res.get(animation::Animation::Idle) else {
+        error!("Failed to find animation: Idle");
+        return;
+    };
 
     commands.spawn((
         SpriteSheetBundle {
@@ -102,7 +105,9 @@ fn player_jump(
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    let Ok((player, mut player_transform, mut jump)) = player.get_single_mut() else { return; };
+    let Ok((player, mut player_transform, mut jump)) = player.get_single_mut() else {
+        return;
+    };
 
     // acceleration
     let jump_power: f32 = time.delta_seconds() * player.jump_speed * 2.;
@@ -133,7 +138,9 @@ fn player_fall(
 }
 
 fn ground_detection(mut player_query: Query<&mut Transform, With<Player>>) {
-    let Ok(mut player_transform) = player_query.get_single_mut() else {return;};
+    let Ok(mut player_transform) = player_query.get_single_mut() else {
+        return;
+    };
 
     if player_transform.translation.y < -globals::CEILING {
         player_transform.translation.y = -globals::CEILING;
