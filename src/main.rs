@@ -27,9 +27,9 @@ fn main() {
                     ..default()
                 }),
         )
-        .add_plugin(player::PlayerPlugin)
-        .add_plugin(animation::AnimationPlugin)
-        .add_startup_system(setup)
+        .add_plugins(player::PlayerPlugin)
+        .add_plugins(animation::AnimationPlugin)
+        .add_systems(Startup, setup)
         .run();
 }
 

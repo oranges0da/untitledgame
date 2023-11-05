@@ -8,8 +8,8 @@ pub struct AnimationPlugin;
 impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerAnimations>()
-            .add_system(animate_player)
-            .add_system(change_player_animation);
+            .add_systems(Update, animate_player)
+            .add_systems(Update, change_player_animation);
     }
 }
 

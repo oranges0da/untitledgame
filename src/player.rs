@@ -16,11 +16,11 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player)
-            .add_system(move_player)
-            .add_system(player_jump)
-            .add_system(player_fall)
-            .add_system(ground_detection);
+        app.add_systems(Startup, spawn_player)
+            .add_systems(Update, move_player)
+            .add_systems(Update, player_jump)
+            .add_systems(Update, player_fall)
+            .add_systems(Update, ground_detection);
     }
 }
 
