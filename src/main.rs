@@ -1,12 +1,10 @@
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+use bevy_rapier2d::prelude::*;
 
 mod animation;
 mod globals;
 mod player;
-
-pub const HEIGHT: f32 = 640.;
-pub const WIDTH: f32 = 480.;
 
 fn main() {
     App::new()
@@ -27,6 +25,8 @@ fn main() {
                     ..default()
                 }),
         )
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(16.))
+        .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(player::PlayerPlugin)
         .add_plugins(animation::AnimationPlugin)
         .add_systems(Startup, setup)

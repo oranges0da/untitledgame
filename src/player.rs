@@ -76,7 +76,7 @@ fn move_player(
         let mut direction = Vec3::ZERO;
 
         if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-            && player_pos.translation.x < crate::WIDTH
+            && player_pos.translation.x < globals::WIDTH
         {
             direction += Vec3::new(-1., 0., 0.);
         }
