@@ -1,6 +1,7 @@
 use crate::animation;
 use crate::globals;
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
@@ -30,7 +31,7 @@ fn spawn_player(
     asset_server: Res<AssetServer>,
     animation_res: Res<animation::PlayerAnimations>,
 ) {
-    // load spritesheet and split into grid of individual sprites
+    // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
     let texture_handle = asset_server.load("spritesheet.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
@@ -41,6 +42,8 @@ fn spawn_player(
         Some(Vec2::new(0., 0.)),
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
+
+    // get current animation from global animation resource to use in Player component
     let Some(animation) = animation_res.get(animation::Animation::Idle) else {
         error!("Failed to find animation: Idle");
         return;
@@ -56,6 +59,7 @@ fn spawn_player(
             transform: Transform::from_scale(Vec3::new(2., 2., 0.)), // make sprite bigger by a factor of PLAYER_SIZE
             ..default()
         },
+        RigidBody::Dynamic,
         Player {
             speed: globals::SPEED,
             jump_speed: globals::JUMP_SPEED,
@@ -67,35 +71,7 @@ fn spawn_player(
     ));
 }
 
-fn move_player(
-    mut player_query: Query<(&Player, &mut Transform), With<Player>>,
-    keyboard_input: Res<Input<KeyCode>>,
-    time: Res<Time>,
-) {
-    if let Ok((player, mut player_pos)) = player_query.get_single_mut() {
-        let mut direction = Vec3::ZERO;
-
-        if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-            && player_pos.translation.x < globals::WIDTH
-        {
-            direction += Vec3::new(-1., 0., 0.);
-        }
-
-        if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
-            direction += Vec3::new(1., 0., 0.);
-        }
-
-        if direction.length() > 0.0 {
-            direction = direction.normalize(); // allows sprite to move diagonally
-        }
-
-        // setting translation vector to our own updated direction vector
-        // delta_seconds returns time elapsed since last frame, used to make movement frame-rate independent
-        player_pos.translation += direction * player.speed * time.delta_seconds();
-    } else {
-        info!("Could not parse player_transform");
-    }
-}
+fn move_player() {}
 
 #[derive(Component)]
 struct Jump(f32);

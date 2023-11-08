@@ -132,12 +132,10 @@ fn change_player_animation(
     // flip sprite on x axis when going from left to right, or vice-verse
     if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
         sprite.flip_x = true;
-        player_transform.translation.x += 35.; // offset x by player width
     } else if keyboard_input.any_just_pressed([KeyCode::D, KeyCode::Right])
         && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
     {
         sprite.flip_x = false;
-        player_transform.translation.x -= 35.;
     } else if keyboard_input.any_just_released([KeyCode::A, KeyCode::Left])
         && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
         && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
@@ -173,5 +171,4 @@ fn change_player_animation(
         return ();
     };
     player.animation = new_animation;
-    info!("Current animation: {:?}", player.animation);
 }

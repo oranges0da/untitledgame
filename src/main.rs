@@ -25,7 +25,7 @@ fn main() {
                     ..default()
                 }),
         )
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(16.))
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(32.))
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(player::PlayerPlugin)
         .add_plugins(animation::AnimationPlugin)
