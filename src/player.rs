@@ -49,29 +49,59 @@ fn spawn_player(
         return;
     };
 
-    commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: texture_atlas_handle,
-            sprite: TextureAtlasSprite {
-                index: 0, // index of which sprite to spawn in sheet
+    commands
+        .spawn((
+            SpriteSheetBundle {
+                texture_atlas: texture_atlas_handle,
+                sprite: TextureAtlasSprite {
+                    index: 0, // index of which sprite to spawn in sheet
+                    ..default()
+                },
+                transform: Transform::from_scale(Vec3::new(2., 2., 0.)), // make sprite bigger by a factor of PLAYER_SIZE
                 ..default()
             },
-            transform: Transform::from_scale(Vec3::new(2., 2., 0.)), // make sprite bigger by a factor of PLAYER_SIZE
-            ..default()
-        },
-        RigidBody::Dynamic,
-        Player {
-            speed: globals::SPEED,
-            jump_speed: globals::JUMP_SPEED,
-            fall_speed: globals::FALL_SPEED,
-            animation,
-            frame_time: 0.6,
-        },
-        Jump(100.),
-    ));
+            Player {
+                speed: globals::SPEED,
+                jump_speed: globals::JUMP_SPEED,
+                fall_speed: globals::FALL_SPEED,
+                animation,
+                frame_time: 0.6,
+            },
+            Jump(100.),
+        ))
+        .insert(RigidBody::Dynamic);
 }
 
-fn move_player() {}
+fn move_player(
+    mut player_query: Query<(&Player, &mut Transform), With<Player>>,
+    keyboard_input: Res<Input<KeyCode>>,
+    time: Res<Time>,
+) {
+    if let Ok((player, mut player_pos)) = player_query.get_single_mut() {
+        let mut direction = Vec3::ZERO;
+
+        if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
+            && player_pos.translation.x < globals::WIDTH
+        {
+            direction += Vec3::new(-100., 0., 0.);
+        }
+
+        if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
+            direction += Vec3::new(1., 0., 0.);
+        }
+
+        if direction.length() > 0. {
+            direction = direction.normalize(); // allows sprite to move diagonally
+        }
+
+        // Setting translation vector to product of updated direction vector
+        // delta_seconds returns time elapsed since last frame, used to make movement frame-rate independent
+        // as well as player.speed stems from globals
+        player_pos.translation += direction * player.speed * time.delta_seconds();
+    } else {
+        info!("Could not parse player_transform");
+    }
+}
 
 #[derive(Component)]
 struct Jump(f32);
