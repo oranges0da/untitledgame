@@ -147,7 +147,7 @@ fn change_player_animation(
 
     let curr_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
             // to not play running animation when pressing jump and left or right at same time
-            && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && player_transform.translation.y == -globals::CEILING
+            && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && player_transform.translation.y <= -globals::CEILING
     {
         Animation::Run
     } else if keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
@@ -173,5 +173,4 @@ fn change_player_animation(
         return ();
     };
     player.animation = new_animation;
-    info!("Current animation: {:?}", player.animation);
 }

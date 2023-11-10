@@ -5,8 +5,7 @@ use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
-    speed: f32, // movement speed of player on screen
-    jump_speed: f32,
+    speed: f32,      // movement speed of player on screen
     fall_speed: f32, // how quickly player falls
     pub animation: animation::SpriteAnimation,
     pub frame_time: f32, // compare player frame_time to animation frame_time
@@ -62,14 +61,13 @@ fn spawn_player(
             },
             Player {
                 speed: globals::SPEED,
-                jump_speed: globals::JUMP_SPEED,
                 fall_speed: globals::FALL_SPEED,
                 animation,
                 frame_time: 0.6,
             },
-            Jump(100.),
         ))
-        .insert(RigidBody::Dynamic);
+        .insert(RigidBody::Dynamic)
+        .insert(Velocity::default());
 }
 
 fn move_player(
@@ -99,31 +97,22 @@ fn move_player(
         // as well as player.speed stems from globals
         player_pos.translation += direction * player.speed * time.delta_seconds();
     } else {
-        info!("Could not parse player_transform");
+        info!("Could not parse player_transform when moving player.");
     }
 }
 
-#[derive(Component)]
-struct Jump(f32);
-
 fn player_jump(
-    mut player: Query<(&Player, &mut Transform, &mut Jump), With<Player>>,
+    mut velocity: Query<&mut Velocity, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
-    time: Res<Time>,
 ) {
-    let Ok((player, mut player_transform, mut jump)) = player.get_single_mut() else {
-        return;
+    let Ok(mut vel) = velocity.get_single_mut() else {
+        panic!("Could not parse player query in player_jump.");
     };
 
-    // acceleration
-    let jump_power: f32 = time.delta_seconds() * player.jump_speed * 2.;
-
-    jump.0 -= jump_power;
-
-    if keyboard_input.any_pressed([KeyCode::W, KeyCode::Space, KeyCode::Up])
-        && player_transform.translation.y < globals::CEILING
-    {
-        player_transform.translation.y += jump_power;
+    if keyboard_input.pressed(KeyCode::Up) {
+        vel.linvel.y = 100.;
+    } else {
+        vel.linvel.y = vel.linvel.y.min(0.0);
     }
 }
 
