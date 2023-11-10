@@ -5,8 +5,7 @@ use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
-    speed: f32,      // movement speed of player on screen
-    fall_speed: f32, // how quickly player falls
+    speed: f32, // movement speed of player on screen
     pub animation: animation::SpriteAnimation,
     pub frame_time: f32, // compare player frame_time to animation frame_time
 }
@@ -61,7 +60,6 @@ fn spawn_player(
             },
             Player {
                 speed: globals::SPEED,
-                fall_speed: globals::FALL_SPEED,
                 animation,
                 frame_time: 0.6,
             },
