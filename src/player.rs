@@ -117,18 +117,15 @@ fn player_jump(
 }
 
 fn player_fall(
-    mut player_query: Query<(&Player, &mut Transform), With<Player>>,
+    mut player: Query<(&Transform, &mut Velocity), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
-    time: Res<Time>,
 ) {
-    if let Ok((player, mut player_transform)) = player_query.get_single_mut() {
-        let fall_power: f32 = player.fall_speed * time.delta_seconds() * 2.;
+    let Ok((pos, mut vel)) = player.get_single_mut() else {
+        panic!("Could not parse player in player_fall.");
+    };
 
-        if !keyboard_input.any_pressed([KeyCode::Up, KeyCode::W, KeyCode::Space])
-            && player_transform.translation.y < globals::HEIGHT
-        {
-            player_transform.translation.y -= fall_power;
-        }
+    if pos.translation.y > 0. && !keyboard_input.pressed(KeyCode::Up) {
+        vel.linvel.y = -50.
     }
 }
 
