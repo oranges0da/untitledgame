@@ -125,7 +125,7 @@ fn player_fall(
         let fall_power: f32 = player.fall_speed * time.delta_seconds() * 2.;
 
         if !keyboard_input.any_pressed([KeyCode::Up, KeyCode::W, KeyCode::Space])
-            && player_transform.translation.y < globals::CEILING * 2.
+            && player_transform.translation.y < globals::HEIGHT
         {
             player_transform.translation.y -= fall_power;
         }
@@ -137,7 +137,7 @@ fn ground_detection(mut player_query: Query<&mut Transform, With<Player>>) {
         return;
     };
 
-    if player_transform.translation.y < -globals::CEILING {
-        player_transform.translation.y = -globals::CEILING;
+    if player_transform.translation.y < 0. {
+        player_transform.translation.y = 0.
     }
 }
