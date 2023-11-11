@@ -30,14 +30,14 @@ fn spawn_player(
     animation_res: Res<animation::PlayerAnimations>,
 ) {
     // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
-    let texture_handle = asset_server.load("spritesheet.png");
+    let texture_handle = asset_server.load("player/idle.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
-        Vec2::new(30., 32.),
-        9,
-        8,
-        Some(Vec2::new(2., 0.5)),
-        Some(Vec2::new(0., 0.)),
+        Vec2::new(30., 33.),
+        5,
+        1,
+        Some(Vec2::new(2., 0.)),
+        None,
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
@@ -55,7 +55,7 @@ fn spawn_player(
                     index: 0, // index of which sprite to spawn in sheet
                     ..default()
                 },
-                transform: Transform::from_scale(Vec3::new(2., 2., 0.)), // make sprite bigger by a factor of PLAYER_SIZE
+                transform: Transform::from_scale(Vec3::new(2.2, 2.2, 0.)), // make sprite bigger by a factor of PLAYER_SIZE
                 ..default()
             },
             Player {

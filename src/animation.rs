@@ -15,9 +15,9 @@ impl Plugin for AnimationPlugin {
 
 #[derive(Component, Clone, Debug)]
 pub struct SpriteAnimation {
-    pub starting_index: usize,
     pub len: usize,
     pub frame_time: f32,
+    pub spritesheet: Handle<TextureAtlas>,
 }
 #[derive(Component, Debug)]
 pub struct FrameTime(pub f32);
@@ -27,7 +27,6 @@ pub enum Animation {
     Idle,
     Run,
     Jump,
-    Fall,
 }
 
 #[derive(Resource)]
@@ -47,43 +46,36 @@ impl PlayerAnimations {
 
 // init PlayerAnimations resource with from_world and add animation data
 impl FromWorld for PlayerAnimations {
-    fn from_world(_world: &mut World) -> Self {
+    fn from_world(world: &mut World) -> Self {
         let mut map = PlayerAnimations {
             map: HashMap::new(),
         };
 
+        let asset_server = world.resource::<AssetServer>();
+
         map.add(
             Animation::Idle,
             SpriteAnimation {
-                starting_index: 0,
-                len: 2,
-                frame_time: 0.4,
+                len: 5,
+                frame_time: 0.2,
+                spritesheet: asset_server.load("player/idle.png"),
             },
         );
         map.add(
             Animation::Run,
             SpriteAnimation {
-                starting_index: 27,
-                len: 8,
+                len: 6,
                 frame_time: 0.12,
+                spritesheet: asset_server.load("player/run.png"),
             },
         );
 
         map.add(
             Animation::Jump,
             SpriteAnimation {
-                starting_index: 49,
-                len: 2,
-                frame_time: 0.2,
-            },
-        );
-
-        map.add(
-            Animation::Fall,
-            SpriteAnimation {
-                starting_index: 50,
                 len: 1,
-                frame_time: 1.,
+                frame_time: 0.2,
+                spritesheet: asset_server.load("player/jump.png"),
             },
         );
 
@@ -105,9 +97,8 @@ fn animate_player(
             sprite.index += frames_elapsed;
 
             // if sprite index becomes greater than length of total animation frames, reset sprite index
-            if sprite.index - player.animation.starting_index >= player.animation.len {
+            if sprite.index >= player.animation.len {
                 sprite.index %= player.animation.len;
-                sprite.index += player.animation.starting_index;
             }
 
             // subtract total frames from frame_time as to not accumulate in frame_time
@@ -157,12 +148,6 @@ fn change_player_animation(
         && keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right])
     {
         Animation::Jump
-    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
-        Animation::Fall
-    } else if player_transform.translation.y > 0.
-        && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space])
-    {
-        Animation::Fall
     } else {
         Animation::Idle
     };
