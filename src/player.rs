@@ -52,10 +52,11 @@ fn spawn_player(
             SpriteSheetBundle {
                 texture_atlas: texture_atlas_handle,
                 sprite: TextureAtlasSprite {
-                    index: 0, // index of which sprite to spawn in sheet
+                    index: 0, // index of which image to spawn in spritesheet
                     ..default()
                 },
-                transform: Transform::from_scale(Vec3::new(2.2, 2.2, 0.)), // make sprite bigger by a factor of PLAYER_SIZE
+                transform: Transform::from_scale(Vec3::new(2.2, 2.2, 0.))
+                    .with_translation(Vec3::new(0., 0., 1.)), // z field of translation vector will determine z-index (overlay player over background)
                 ..default()
             },
             Player {

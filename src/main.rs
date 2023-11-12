@@ -4,6 +4,7 @@ use bevy_rapier2d::prelude::*;
 
 mod animation;
 mod globals;
+mod map;
 mod player;
 
 fn main() {
@@ -25,11 +26,12 @@ fn main() {
                     ..default()
                 }),
         )
+        .add_systems(Startup, setup)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(32.))
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(player::PlayerPlugin)
         .add_plugins(animation::AnimationPlugin)
-        .add_systems(Startup, setup)
+        .add_plugins(map::MapPlugin)
         .run();
 }
 
