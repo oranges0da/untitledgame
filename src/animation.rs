@@ -162,21 +162,17 @@ fn change_player_animation(
 
 fn flip_sprite(
     mut player_sprite: Query<&mut TextureAtlasSprite, With<Player>>,
-    mut player_transform_query: Query<&mut Transform, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     let mut sprite = player_sprite.single_mut();
-    let mut player_transform = player_transform_query.single_mut();
 
     // flip sprite on x axis when going from left to right, or vice-verse
     if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
         sprite.flip_x = true;
-        player_transform.translation.x += 35.; // offset x by player width
     } else if keyboard_input.any_just_pressed([KeyCode::D, KeyCode::Right])
         && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
     {
         sprite.flip_x = false;
-        player_transform.translation.x -= 35.;
     } else if keyboard_input.any_just_released([KeyCode::A, KeyCode::Left])
         && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
         && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
