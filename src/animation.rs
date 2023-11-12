@@ -120,35 +120,6 @@ fn change_player_animation(
     let player_transform = player_transform_query.single();
     let mut atlas = texture_atlas_query.single_mut();
 
-    let path = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
-    // to not play running animation when pressing jump and left or right at same time
-    && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && player_transform.translation.y <= 0.
-    {
-        "player/run.png"
-    } else if keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
-        "player/jump.png"
-    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
-        "player/jump.png"
-    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
-        && keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right])
-    {
-        "player/jump.png"
-    } else {
-        "player/idle.png"
-    };
-
-    // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
-    let texture_handle = asset_server.load(path);
-    let texture_atlas = TextureAtlas::from_grid(
-        texture_handle,
-        Vec2::new(30., 33.),
-        5,
-        1,
-        Some(Vec2::new(2., 0.)),
-        None,
-    );
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
-
     let curr_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
             // to not play running animation when pressing jump and left or right at same time
             && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && player_transform.translation.y <= 0.
@@ -171,6 +142,19 @@ fn change_player_animation(
         return ();
     };
 
+    // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
+    let texture_handle = asset_server.load(&new_animation.path);
+    let texture_atlas = TextureAtlas::from_grid(
+        texture_handle,
+        Vec2::new(30., 33.),
+        5,
+        1,
+        Some(Vec2::new(2., 0.)),
+        None,
+    );
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+
+    // set current animation and correct spritesheet
     player.animation = new_animation;
     *atlas = texture_atlas_handle;
 }
