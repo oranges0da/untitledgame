@@ -14,7 +14,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()) // necessary to not spawn blurry sprites
                 .set(WindowPlugin {
                     primary_window: Some(Window {
-                        title: "Popcorn Guy".into(),
+                        title: "Untitled Game".into(),
                         resolution: (globals::HEIGHT, globals::WIDTH).into(),
                         present_mode: PresentMode::AutoVsync,
                         // Tells wasm to resize the window according to the available canvas
