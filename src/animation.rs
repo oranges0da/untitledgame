@@ -9,7 +9,8 @@ impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerAnimations>()
             .add_systems(Update, animate_player)
-            .add_systems(Update, change_player_animation);
+            .add_systems(Update, change_player_animation)
+            .add_systems(Update, flip_sprite);
     }
 }
 
@@ -17,7 +18,7 @@ impl Plugin for AnimationPlugin {
 pub struct SpriteAnimation {
     pub len: usize,
     pub frame_time: f32,
-    pub spritesheet: Handle<TextureAtlas>,
+    pub path: String,
 }
 #[derive(Component, Debug)]
 pub struct FrameTime(pub f32);
@@ -46,27 +47,25 @@ impl PlayerAnimations {
 
 // init PlayerAnimations resource with from_world and add animation data
 impl FromWorld for PlayerAnimations {
-    fn from_world(world: &mut World) -> Self {
+    fn from_world(_world: &mut World) -> Self {
         let mut map = PlayerAnimations {
             map: HashMap::new(),
         };
-
-        let asset_server = world.resource::<AssetServer>();
 
         map.add(
             Animation::Idle,
             SpriteAnimation {
                 len: 5,
                 frame_time: 0.2,
-                spritesheet: asset_server.load("player/idle.png"),
+                path: "player/idle.png".to_string(),
             },
         );
         map.add(
             Animation::Run,
             SpriteAnimation {
-                len: 6,
+                len: 5,
                 frame_time: 0.12,
-                spritesheet: asset_server.load("player/run.png"),
+                path: "player/run.png".to_string(),
             },
         );
 
@@ -75,7 +74,7 @@ impl FromWorld for PlayerAnimations {
             SpriteAnimation {
                 len: 1,
                 frame_time: 0.2,
-                spritesheet: asset_server.load("player/jump.png"),
+                path: "player/jump.png".to_string(),
             },
         );
 
@@ -85,7 +84,7 @@ impl FromWorld for PlayerAnimations {
 
 // fundamental animation logic, will be the same for any animation implemented
 fn animate_player(
-    mut player_query: Query<(&mut Player, &mut TextureAtlasSprite)>, // cannot include TextureAtlasSprite in Player{} due to the way Bevy renders entities
+    mut player_query: Query<(&mut Player, &mut TextureAtlasSprite), With<Player>>, // cannot include TextureAtlasSprite in Player{} due to the way Bevy renders entities
     time: Res<Time>,
 ) {
     for (mut player, mut sprite) in player_query.iter_mut() {
@@ -110,30 +109,12 @@ fn animate_player(
 // change animation component attached Player entity to desired SpriteAnimation
 fn change_player_animation(
     mut player: Query<&mut Player>,
-    mut player_sprite: Query<&mut TextureAtlasSprite, With<Player>>,
-    mut player_transform_query: Query<&mut Transform, With<Player>>,
+    player_transform_query: Query<&mut Transform, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     animations: Res<PlayerAnimations>,
 ) {
     let mut player = player.single_mut();
-    let mut sprite = player_sprite.single_mut();
-    let mut player_transform = player_transform_query.single_mut();
-
-    // flip sprite on x axis when going from left to right, or vice-verse
-    if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
-        sprite.flip_x = true;
-        player_transform.translation.x += 35.; // offset x by player width
-    } else if keyboard_input.any_just_pressed([KeyCode::D, KeyCode::Right])
-        && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-    {
-        sprite.flip_x = false;
-        player_transform.translation.x -= 35.;
-    } else if keyboard_input.any_just_released([KeyCode::A, KeyCode::Left])
-        && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-        && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
-    {
-        sprite.flip_x = false;
-    }
+    let player_transform = player_transform_query.single();
 
     let curr_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
             // to not play running animation when pressing jump and left or right at same time
@@ -156,5 +137,31 @@ fn change_player_animation(
     let Some(new_animation) = animations.get(curr_animation) else {
         return ();
     };
+
     player.animation = new_animation;
+}
+
+fn flip_sprite(
+    mut player_sprite: Query<&mut TextureAtlasSprite, With<Player>>,
+    mut player_transform_query: Query<&mut Transform, With<Player>>,
+    keyboard_input: Res<Input<KeyCode>>,
+) {
+    let mut sprite = player_sprite.single_mut();
+    let mut player_transform = player_transform_query.single_mut();
+
+    // flip sprite on x axis when going from left to right, or vice-verse
+    if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
+        sprite.flip_x = true;
+        player_transform.translation.x += 35.; // offset x by player width
+    } else if keyboard_input.any_just_pressed([KeyCode::D, KeyCode::Right])
+        && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
+    {
+        sprite.flip_x = false;
+        player_transform.translation.x -= 35.;
+    } else if keyboard_input.any_just_released([KeyCode::A, KeyCode::Left])
+        && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
+        && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
+    {
+        sprite.flip_x = false;
+    }
 }

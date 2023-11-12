@@ -25,8 +25,8 @@ impl Plugin for PlayerPlugin {
 
 fn spawn_player(
     mut commands: Commands,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     animation_res: Res<animation::PlayerAnimations>,
 ) {
     // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
