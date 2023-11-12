@@ -73,7 +73,7 @@ impl FromWorld for PlayerAnimations {
             Animation::Jump,
             SpriteAnimation {
                 len: 1,
-                frame_time: 0.2,
+                frame_time: 0.,
                 path: "player/jump.png".to_string(),
             },
         );
@@ -106,15 +106,48 @@ fn animate_player(
     }
 }
 
-// change animation component attached Player entity to desired SpriteAnimation
+// change player animation and texture_atlas (spritesheet) according to action
 fn change_player_animation(
     mut player: Query<&mut Player>,
     player_transform_query: Query<&mut Transform, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     animations: Res<PlayerAnimations>,
+    mut texture_atlas_query: Query<&mut Handle<TextureAtlas>, With<Player>>,
 ) {
     let mut player = player.single_mut();
     let player_transform = player_transform_query.single();
+    let mut atlas = texture_atlas_query.single_mut();
+
+    let path = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
+    // to not play running animation when pressing jump and left or right at same time
+    && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && player_transform.translation.y <= 0.
+    {
+        "player/run.png"
+    } else if keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
+        "player/jump.png"
+    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
+        "player/jump.png"
+    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
+        && keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right])
+    {
+        "player/jump.png"
+    } else {
+        "player/idle.png"
+    };
+
+    // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
+    let texture_handle = asset_server.load(path);
+    let texture_atlas = TextureAtlas::from_grid(
+        texture_handle,
+        Vec2::new(30., 33.),
+        5,
+        1,
+        Some(Vec2::new(2., 0.)),
+        None,
+    );
+    let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     let curr_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
             // to not play running animation when pressing jump and left or right at same time
@@ -139,6 +172,7 @@ fn change_player_animation(
     };
 
     player.animation = new_animation;
+    *atlas = texture_atlas_handle;
 }
 
 fn flip_sprite(
