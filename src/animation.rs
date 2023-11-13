@@ -145,14 +145,8 @@ fn change_player_animation(
 
     // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
     let texture_handle = asset_server.load(&new_animation.path);
-    let texture_atlas = TextureAtlas::from_grid(
-        texture_handle,
-        Vec2::new(30., 33.),
-        5,
-        1,
-        Some(Vec2::new(2., 0.)),
-        None,
-    );
+    let texture_atlas =
+        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 32.), 5, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     // set current animation and correct spritesheet
