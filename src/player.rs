@@ -17,30 +17,11 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
             .add_systems(Update, move_player)
-            .add_systems(Update, player_jump)
-            .add_systems(Update, player_fall)
-            .add_systems(Update, ground_detection);
+            .add_systems(Update, player_jump);
     }
 }
 
-fn spawn_player(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    animation_res: Res<animation::PlayerAnimations>,
-) {
-    // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
-    let texture_handle = asset_server.load("player/idle.png");
-    let texture_atlas = TextureAtlas::from_grid(
-        texture_handle,
-        Vec2::new(30., 33.),
-        5,
-        1,
-        Some(Vec2::new(2., 0.)),
-        None,
-    );
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
-
+fn spawn_player(mut commands: Commands, animation_res: Res<animation::PlayerAnimations>) {
     // get current animation from global animation resource to use in Player component
     let Some(animation) = animation_res.get(animation::Animation::Idle) else {
         error!("Failed to find animation: Idle");
@@ -50,11 +31,6 @@ fn spawn_player(
     commands
         .spawn((
             SpriteSheetBundle {
-                texture_atlas: texture_atlas_handle,
-                sprite: TextureAtlasSprite {
-                    index: 0, // index of which image to spawn in spritesheet
-                    ..default()
-                },
                 transform: Transform::from_scale(Vec3::new(2.2, 2.2, 0.))
                     .with_translation(Vec3::new(0., 0., 1.)), // z field of translation vector will determine z-index (overlay player over background)
                 ..default()
@@ -66,7 +42,9 @@ fn spawn_player(
             },
         ))
         .insert(RigidBody::Dynamic)
-        .insert(Velocity::default());
+        .insert(Velocity::default())
+        .insert(AdditionalMassProperties::Mass(10.0)) // set mass of player
+        .insert(GravityScale(2.0)); // subject player to gravity
 }
 
 fn move_player(
@@ -112,28 +90,5 @@ fn player_jump(
         vel.linvel.y = 100.;
     } else {
         vel.linvel.y = vel.linvel.y.min(0.0);
-    }
-}
-
-fn player_fall(
-    mut player: Query<(&Transform, &mut Velocity), With<Player>>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
-    let Ok((pos, mut vel)) = player.get_single_mut() else {
-        panic!("Could not parse player in player_fall.");
-    };
-
-    if pos.translation.y > 0. && !keyboard_input.pressed(KeyCode::Up) {
-        vel.linvel.y = -50.
-    }
-}
-
-fn ground_detection(mut player_query: Query<&mut Transform, With<Player>>) {
-    let Ok(mut player_transform) = player_query.get_single_mut() else {
-        return;
-    };
-
-    if player_transform.translation.y < 0. {
-        player_transform.translation.y = 0.
     }
 }
