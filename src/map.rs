@@ -12,7 +12,6 @@ impl Plugin for MapPlugin {
 fn spawn_map(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(SpriteBundle {
         texture: asset_server.load("map/bg.png"),
-        transform: Transform::from_scale(Vec3::new(0.5, 0.5, 0.)),
         ..default()
     });
 }
