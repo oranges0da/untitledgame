@@ -125,10 +125,7 @@ fn change_player_animation(
             && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && player_transform.translation.y <= 0.
     {
         Animation::Run
-    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
-        // if player is above ground (jumping or falling)
-        || player_transform.translation.y > 0.
-    {
+    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
         Animation::Jump
     } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
         && keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right])
