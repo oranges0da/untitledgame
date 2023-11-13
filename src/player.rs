@@ -44,7 +44,8 @@ fn spawn_player(mut commands: Commands, animation_res: Res<animation::PlayerAnim
         .insert(RigidBody::Dynamic)
         .insert(Velocity::default())
         .insert(AdditionalMassProperties::Mass(10.0)) // set mass of player
-        .insert(GravityScale(2.0)); // subject player to gravity
+        .insert(GravityScale(2.0)) // subject player to gravity
+        .insert(Collider::cuboid(12., 16.));
 }
 
 fn move_player(
