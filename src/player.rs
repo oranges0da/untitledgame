@@ -17,7 +17,8 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
             .add_systems(Update, move_player)
-            .add_systems(Update, player_jump);
+            .add_systems(Update, player_jump)
+            .add_systems(Update, print_player_pos);
     }
 }
 
@@ -92,4 +93,12 @@ fn player_jump(
     } else {
         vel.linvel.y = vel.linvel.y.min(0.0);
     }
+}
+
+fn print_player_pos(transform_query: Query<&Transform, With<Player>>) {
+    let pos = transform_query.single();
+    info!(
+        "Position: X: {:?} Y: {:?}",
+        pos.translation.x, pos.translation.y
+    );
 }
