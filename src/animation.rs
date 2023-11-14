@@ -1,5 +1,6 @@
 use crate::player::Player;
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Component)]
@@ -119,31 +120,28 @@ fn animate_player(
 // change player animation and texture_atlas (spritesheet) according to action
 fn change_player_animation(
     mut player: Query<&mut Player>,
-    player_transform_query: Query<&mut Transform, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     animations: Res<PlayerAnimations>,
     mut texture_atlas_query: Query<&mut Handle<TextureAtlas>, With<Player>>,
+    velocity: Query<&Velocity, With<Player>>,
 ) {
+    const VEL_LIMIT: f32 = 0.2;
+
     let mut player = player.single_mut();
-    let player_transform = player_transform_query.single();
     let mut atlas = texture_atlas_query.single_mut();
+    let vel = velocity.single();
 
     let curr_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
             // to not play running animation when pressing jump and left or right at same time
-            && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && player_transform.translation.y <= 0.
+            && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space, KeyCode::S, KeyCode::Down]) && vel.linvel.y > -VEL_LIMIT
     {
         Animation::Run
-    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
+    } else if vel.linvel.y > VEL_LIMIT {
         Animation::Jump
-    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
-        && keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right])
-    {
-        Animation::Jump
-    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
-        && keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right])
-    {
+    } else if vel.linvel.y < -VEL_LIMIT {
+        // cannot set to 0 due to rapier setting velocity to -0 sometimes for some reason
         Animation::Fall
     } else {
         Animation::Idle

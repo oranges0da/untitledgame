@@ -95,10 +95,7 @@ fn player_jump(
     }
 }
 
-fn print_player_pos(transform_query: Query<&Transform, With<Player>>) {
-    let pos = transform_query.single();
-    info!(
-        "Player Position: X: {:.0} Y: {:.0}",
-        pos.translation.x, pos.translation.y
-    );
+fn print_player_pos(velocity: Query<&Velocity, With<Player>>) {
+    let vel = velocity.single();
+    info!("Vel: {:.2}", vel.linvel.y);
 }
