@@ -28,6 +28,7 @@ pub enum Animation {
     Idle,
     Run,
     Jump,
+    Fall,
 }
 
 #[derive(Resource)]
@@ -75,6 +76,15 @@ impl FromWorld for PlayerAnimations {
                 len: 1,
                 frame_time: 0.,
                 path: "player/jump.png".to_string(),
+            },
+        );
+
+        map.add(
+            Animation::Fall,
+            SpriteAnimation {
+                len: 1,
+                frame_time: 0.,
+                path: "player/fall.png".to_string(),
             },
         );
 
@@ -131,6 +141,10 @@ fn change_player_animation(
         && keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right])
     {
         Animation::Jump
+    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
+        && keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right])
+    {
+        Animation::Fall
     } else {
         Animation::Idle
     };
