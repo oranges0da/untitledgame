@@ -98,7 +98,7 @@ fn player_jump(
 fn print_player_pos(transform_query: Query<&Transform, With<Player>>) {
     let pos = transform_query.single();
     info!(
-        "Position: X: {:?} Y: {:?}",
+        "Player Position: X: {:.0} Y: {:.0}",
         pos.translation.x, pos.translation.y
     );
 }
