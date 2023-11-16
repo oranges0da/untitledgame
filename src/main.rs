@@ -3,7 +3,6 @@ use bevy::window::PresentMode;
 use bevy_rapier2d::prelude::*;
 
 mod animation;
-mod globals;
 mod map;
 mod player;
 
@@ -15,7 +14,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Untitled Game".into(),
-                        resolution: (globals::HEIGHT, globals::WIDTH).into(),
+                        resolution: (640., 480.).into(),
                         present_mode: PresentMode::AutoVsync,
                         // Tells wasm to resize the window according to the available canvas
                         fit_canvas_to_parent: true,

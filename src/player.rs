@@ -1,5 +1,4 @@
 use crate::animation;
-use crate::globals;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -36,7 +35,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<animation::PlayerAnim
                 ..default()
             },
             Player {
-                speed: globals::SPEED,
+                speed: 200.,
                 animation,
                 frame_time: 0.6,
             },
@@ -49,7 +48,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<animation::PlayerAnim
 }
 
 fn move_player(
-    mut player_query: Query<(&Player, &mut Transform), With<Player>>,
+    mut player_query: Query<(&Player, &mut Transform)>,
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
@@ -57,7 +56,7 @@ fn move_player(
         let mut direction = Vec3::ZERO;
 
         if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-            && player_pos.translation.x < globals::WIDTH
+            && player_pos.translation.x < 480.
         {
             direction += Vec3::new(-100., 0., 0.);
         }
