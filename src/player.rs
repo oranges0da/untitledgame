@@ -17,8 +17,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
             .add_systems(Update, move_player)
-            .add_systems(Update, player_jump)
-            .add_systems(Update, print_player_pos);
+            .add_systems(Update, player_jump);
     }
 }
 
@@ -93,9 +92,4 @@ fn player_jump(
     } else {
         vel.linvel.y = vel.linvel.y.min(0.0);
     }
-}
-
-fn print_player_pos(velocity: Query<&Velocity, With<Player>>) {
-    let vel = velocity.single();
-    //info!("Vel: {:.2}", vel.linvel.y);
 }

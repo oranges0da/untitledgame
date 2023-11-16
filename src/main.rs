@@ -27,6 +27,7 @@ fn main() {
                 }),
         )
         .add_systems(Startup, setup)
+        .add_systems(Update, follow_player)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(32.))
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(player::PlayerPlugin)
@@ -35,6 +36,26 @@ fn main() {
         .run();
 }
 
+#[derive(Component)]
+struct PlayerCamera;
+
 fn setup(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn((Camera2dBundle::default(), PlayerCamera));
+}
+
+// camera follows player (player is always centered on screen)
+fn follow_player(
+    player_query: Query<&Transform, With<player::Player>>,
+    mut camera: Query<(&PlayerCamera, &mut Transform), Without<player::Player>>,
+) {
+    let Ok(player) = player_query.get_single() else {
+        return;
+    };
+
+    let Ok((_, mut camera_transform)) = camera.get_single_mut() else {
+        return;
+    };
+
+    // set camera's coordinates to player's coordinates on each frame
+    camera_transform.translation = player.translation;
 }
