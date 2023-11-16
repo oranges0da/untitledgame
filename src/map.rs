@@ -6,14 +6,17 @@ pub struct MapPlugin;
 
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_bg)
-            .add_systems(Startup, spawn_map);
+        app.add_systems(Startup, spawn_map)
+            .add_systems(Update, spawn_bg);
     }
 }
 
 fn spawn_bg(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // spawn earth in background
     commands.spawn(SpriteBundle {
-        texture: asset_server.load("map/bg.png"),
+        texture: asset_server.load("map/earth.png"),
+        transform: Transform::from_translation(Vec3::new(-100., 100., 0.))
+            .with_scale(Vec3::new(2., 2., 0.)),
         ..default()
     });
 }
@@ -56,7 +59,7 @@ fn spawn_map(
             })
             .insert(Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.));
 
-        for y in -240..=-100 {
+        for y in -300..=-100 {
             commands.spawn(SpriteSheetBundle {
                 texture_atlas: texture_atlas_handle.clone(),
                 sprite: TextureAtlasSprite {

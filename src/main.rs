@@ -26,6 +26,7 @@ fn main() {
                     ..default()
                 }),
         )
+        .insert_resource(ClearColor(Color::rgb(0., 0., 0.))) // set background color to black (outer space!)
         .add_systems(Startup, setup)
         .add_systems(Update, follow_player)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(32.))
