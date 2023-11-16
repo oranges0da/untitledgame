@@ -97,5 +97,5 @@ fn player_jump(
 
 fn print_player_pos(velocity: Query<&Velocity, With<Player>>) {
     let vel = velocity.single();
-    info!("Vel: {:.2}", vel.linvel.y);
+    //info!("Vel: {:.2}", vel.linvel.y);
 }

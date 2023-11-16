@@ -23,15 +23,16 @@ fn spawn_map(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    const TILE_SIZE: f32 = 12.; // size of single tile
-    const SCALE: f32 = 5.; // scale to enlarge tiles by
+    const TILE_SIZE: f32 = 12.7; // pixel size of single tile from tileset (not in-game size)
+    const SCALE: f32 = 3.;
+    const GROUND_LEVEL: f32 = -100.;
 
     let texture_handle = asset_server.load("map/tiles.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
         Vec2::new(TILE_SIZE, TILE_SIZE),
-        24,
-        22,
+        10,
+        10,
         None,
         None,
     );
@@ -47,13 +48,29 @@ fn spawn_map(
                 },
                 transform: Transform::from_translation(Vec3::new(
                     x as f32 * TILE_SIZE * SCALE,
-                    -100.,
+                    GROUND_LEVEL,
                     1.,
                 ))
                 .with_scale(Vec3::new(SCALE, SCALE, 0.)),
                 ..default()
             })
-            .insert(RigidBody::Fixed)
             .insert(Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.));
+
+        for y in -240..=-100 {
+            commands.spawn(SpriteSheetBundle {
+                texture_atlas: texture_atlas_handle.clone(),
+                sprite: TextureAtlasSprite {
+                    index: 1,
+                    ..default()
+                },
+                transform: Transform::from_translation(Vec3::new(
+                    x as f32 * TILE_SIZE * SCALE,
+                    y as f32,
+                    1.,
+                ))
+                .with_scale(Vec3::new(SCALE, SCALE, 0.)),
+                ..default()
+            });
+        }
     }
 }
