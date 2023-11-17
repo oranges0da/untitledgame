@@ -15,7 +15,7 @@ fn spawn_bg(mut commands: Commands, asset_server: Res<AssetServer>) {
     // spawn earth in background
     commands.spawn(SpriteBundle {
         texture: asset_server.load("map/earth.png"),
-        transform: Transform::from_translation(Vec3::new(-100., 100., 0.))
+        transform: Transform::from_translation(Vec3::new(-100., 100., -1.))
             .with_scale(Vec3::new(2., 2., 0.)),
         ..default()
     });
@@ -58,22 +58,5 @@ fn spawn_map(
                 ..default()
             })
             .insert(Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.));
-
-        for y in -300..=-100 {
-            commands.spawn(SpriteSheetBundle {
-                texture_atlas: texture_atlas_handle.clone(),
-                sprite: TextureAtlasSprite {
-                    index: 1,
-                    ..default()
-                },
-                transform: Transform::from_translation(Vec3::new(
-                    x as f32 * TILE_SIZE * SCALE,
-                    y as f32,
-                    1.,
-                ))
-                .with_scale(Vec3::new(SCALE, SCALE, 0.)),
-                ..default()
-            });
-        }
     }
 }

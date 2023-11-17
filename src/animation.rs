@@ -75,7 +75,7 @@ impl FromWorld for PlayerAnimations {
             Animation::Jump,
             SpriteAnimation {
                 len: 1,
-                frame_time: 0.,
+                frame_time: 0.1,
                 path: "player/jump.png".to_string(),
             },
         );
@@ -84,7 +84,7 @@ impl FromWorld for PlayerAnimations {
             Animation::Fall,
             SpriteAnimation {
                 len: 1,
-                frame_time: 0.,
+                frame_time: 0.1,
                 path: "player/fall.png".to_string(),
             },
         );
@@ -103,8 +103,10 @@ fn animate_player(
         player.frame_time += time.delta_seconds();
 
         if player.frame_time > player.animation.frame_time {
-            let frames_elapsed = (player.frame_time / player.animation.frame_time) as usize;
-            sprite.index += frames_elapsed;
+            let frames_elapsed = player.frame_time / player.animation.frame_time;
+
+            // animate!
+            sprite.index += frames_elapsed as usize;
 
             // if sprite index becomes greater than length of total animation frames, reset sprite index
             if sprite.index >= player.animation.len {
