@@ -21,8 +21,6 @@ pub struct SpriteAnimation {
     pub frame_time: f32,
     pub path: String,
 }
-#[derive(Component, Debug)]
-pub struct FrameTime(pub f32);
 
 #[derive(Component, Eq, PartialEq, Hash, Debug)]
 pub enum Animation {
