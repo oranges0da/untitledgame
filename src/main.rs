@@ -3,6 +3,7 @@ use bevy::window::PresentMode;
 use bevy_rapier2d::prelude::*;
 
 mod animation;
+mod item;
 mod map;
 mod player;
 
@@ -33,6 +34,7 @@ fn main() {
         .add_plugins(player::PlayerPlugin)
         .add_plugins(animation::AnimationPlugin)
         .add_plugins(map::MapPlugin)
+        .add_plugins(item::ItemPlugin)
         .run();
 }
 
