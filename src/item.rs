@@ -1,13 +1,12 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
 
-#[derive(Component)]
 pub struct ItemPlugin;
 
 impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerItems>()
-            .add_systems(Update, show_item);
+            .add_systems(Update, show_item_ui);
     }
 }
 
@@ -23,7 +22,6 @@ pub struct PlayerItem {
     item_type: ItemType,
     icon_path: String,
     index: i32,
-    amount: i32,
 }
 
 #[derive(Resource)]
@@ -55,7 +53,6 @@ impl FromWorld for PlayerItems {
                 item_type: ItemType::Food,
                 icon_path: "item/food/peanut_butter.png".to_string(),
                 index: 0,
-                amount: 1,
             },
         );
 
@@ -63,15 +60,39 @@ impl FromWorld for PlayerItems {
     }
 }
 
-// test system to make sure we can get specific item out of item_res
-fn show_item(mut commands: Commands, item_res: Res<PlayerItems>, asset_server: Res<AssetServer>) {
-    let Some(item) = item_res.get("peanut_butter".to_string()) else {
+// show current item in corner of screen
+fn show_item_ui(
+    mut commands: Commands,
+    item_res: Res<PlayerItems>,
+    asset_server: Res<AssetServer>,
+) {
+    // get current item (pb) and load its image
+    let Some(curr_item) = item_res.get("peanut_butter".to_string()) else {
         return;
     };
 
-    commands.spawn(SpriteBundle {
-        texture: asset_server.load(item.icon_path),
-        transform: Transform::from_scale(Vec3::new(3., 3., 0.)),
-        ..default()
-    });
+    commands
+        .spawn(NodeBundle {
+            style: Style {
+                position_type: PositionType::Absolute,
+                width: Val::Px(30.),
+                height: Val::Px(30.),
+                top: Val::Px(30.),
+                right: Val::Px(30.),
+                border: UiRect::all(Val::Px(5.)),
+                padding: UiRect::all(Val::Px(30.)),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..default()
+            },
+            border_color: BorderColor(Color::WHITE),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn(ImageBundle {
+                image: asset_server.load("item/food/peanut_butter.png").into(),
+                transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
+                ..default()
+            });
+        });
 }
