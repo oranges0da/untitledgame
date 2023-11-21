@@ -1,3 +1,4 @@
+use crate::player::Player;
 use bevy::prelude::*;
 use std::collections::HashMap;
 
@@ -6,9 +7,14 @@ pub struct ItemPlugin;
 impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerItems>()
+            .add_systems(Startup, spawn_player_item)
+            .add_systems(Update, animate_item)
             .add_systems(Update, show_item_ui);
     }
 }
+
+#[derive(Component)]
+pub struct Item;
 
 #[derive(Clone, Debug)]
 enum ItemType {
@@ -90,9 +96,38 @@ fn show_item_ui(
         })
         .with_children(|parent| {
             parent.spawn(ImageBundle {
-                image: asset_server.load("item/food/peanut_butter.png").into(),
+                image: asset_server.load(curr_item.clone().icon_path).into(),
                 transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
                 ..default()
             });
         });
+}
+
+// spawn item in player's hands
+fn spawn_player_item(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    item_res: Res<PlayerItems>,
+) {
+    commands
+        .spawn(SpriteBundle {
+            texture: asset_server.load("item/food/peanut_butter.png").into(),
+            transform: Transform::from_translation(Vec3::new(100., 10., 2.))
+                .with_scale(Vec3::new(0.8, 0.8, 0.)),
+            ..default()
+        })
+        .insert(Item);
+}
+
+fn animate_item(
+    player: Query<&Transform, With<Player>>,
+    mut item: Query<(&Item, &mut Transform), Without<Player>>,
+) {
+    let player_pos = player.single();
+    let Ok((_, mut item_pos)) = item.get_single_mut() else {
+        return;
+    };
+
+    item_pos.translation.x = player_pos.translation.x + 25.;
+    item_pos.translation.y = player_pos.translation.y - 15.;
 }
