@@ -57,7 +57,7 @@ impl FromWorld for PlayerAnimations {
             SpriteAnimation {
                 len: 5,
                 frame_time: 0.2,
-                path: "player/idle.png".to_string(),
+                path: "player/idle".to_string(),
             },
         );
         map.add(
@@ -65,7 +65,7 @@ impl FromWorld for PlayerAnimations {
             SpriteAnimation {
                 len: 5,
                 frame_time: 0.12,
-                path: "player/run.png".to_string(),
+                path: "player/run".to_string(),
             },
         );
 
@@ -74,7 +74,7 @@ impl FromWorld for PlayerAnimations {
             SpriteAnimation {
                 len: 1,
                 frame_time: 0.1,
-                path: "player/jump.png".to_string(),
+                path: "player/jump".to_string(),
             },
         );
 
@@ -83,7 +83,7 @@ impl FromWorld for PlayerAnimations {
             SpriteAnimation {
                 len: 1,
                 frame_time: 0.1,
-                path: "player/fall.png".to_string(),
+                path: "player/fall".to_string(),
             },
         );
 
@@ -133,7 +133,7 @@ fn change_player_animation(
     let mut atlas = texture_atlas_query.single_mut();
     let vel = velocity.single();
 
-    let curr_animation = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
+    let curr_animation_id = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
             // to not play running animation when pressing jump and left or right at same time
             && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space, KeyCode::S, KeyCode::Down]) && vel.linvel.y > -VEL_LIMIT
     {
@@ -148,12 +148,22 @@ fn change_player_animation(
     };
 
     // get SpriteAnimation data from Animation enum and set accordingly (this is very jerry-rigged for now.)
-    let Some(new_animation) = animations.get(curr_animation) else {
+    let Some(new_animation) = animations.get(curr_animation_id) else {
         return ();
     };
 
+    let path = if player.item.is_some() {
+        let mut new_path = new_animation.path.clone();
+        new_path.push_str("_item.png");
+        new_path
+    } else {
+        let mut new_path = new_animation.path.clone();
+        new_path.push_str(".png");
+        new_path
+    };
+
     // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
-    let texture_handle = asset_server.load(&new_animation.path);
+    let texture_handle = asset_server.load(path);
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 32.), 5, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);

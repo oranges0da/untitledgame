@@ -119,6 +119,7 @@ fn spawn_player_item(
         .insert(Item);
 }
 
+// animate item in player's hands
 fn animate_item(
     player: Query<&Transform, With<Player>>,
     mut item: Query<(&Item, &mut Transform), Without<Player>>,

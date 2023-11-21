@@ -7,7 +7,7 @@ use bevy_rapier2d::prelude::*;
 pub struct Player {
     speed: f32, // movement speed of player on screen
     pub animation: animation::SpriteAnimation,
-    pub item: item::PlayerItem,
+    pub item: Option<item::PlayerItem>,
     pub frame_time: f32, // compare player frame_time to animation frame_time
 }
 
@@ -47,7 +47,7 @@ fn spawn_player(
             Player {
                 speed: 200.,
                 animation,
-                item,
+                item: Some(item),
                 frame_time: 0.6,
             },
         ))
