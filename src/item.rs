@@ -18,11 +18,10 @@ pub struct Item;
 
 #[derive(Clone, Debug)]
 enum ItemType {
-    Weapon,
     Food,
 }
 
-#[derive(Component, Clone, Debug)]
+#[derive(Component, Clone)]
 pub struct PlayerItem {
     name: String,
     item_type: ItemType,
@@ -104,11 +103,7 @@ fn show_item_ui(
 }
 
 // spawn item in player's hands
-fn spawn_player_item(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    item_res: Res<PlayerItems>,
-) {
+fn spawn_player_item(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn(SpriteBundle {
             texture: asset_server.load("item/food/peanut_butter.png").into(),

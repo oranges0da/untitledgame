@@ -15,32 +15,32 @@ impl Plugin for AnimationPlugin {
     }
 }
 
-#[derive(Component, Clone, Debug)]
-pub struct SpriteAnimation {
-    pub len: usize,
-    pub frame_time: f32,
-    pub path: String,
-}
-
 #[derive(Component, Eq, PartialEq, Hash, Debug)]
-pub enum Animation {
+pub enum PlayerAnimationType {
     Idle,
     Run,
     Jump,
     Fall,
 }
 
+#[derive(Component, Clone, Debug)]
+pub struct PlayerAnimation {
+    pub len: usize,
+    pub frame_time: f32,
+    pub path: String,
+}
+
 #[derive(Resource)]
 pub struct PlayerAnimations {
-    pub map: HashMap<Animation, SpriteAnimation>,
+    pub map: HashMap<PlayerAnimationType, PlayerAnimation>,
 }
 
 impl PlayerAnimations {
-    pub fn add(&mut self, id: Animation, animation: SpriteAnimation) {
+    pub fn add(&mut self, id: PlayerAnimationType, animation: PlayerAnimation) {
         self.map.insert(id, animation);
     }
 
-    pub fn get(&self, id: Animation) -> Option<SpriteAnimation> {
+    pub fn get(&self, id: PlayerAnimationType) -> Option<PlayerAnimation> {
         self.map.get(&id).cloned()
     }
 }
@@ -53,16 +53,16 @@ impl FromWorld for PlayerAnimations {
         };
 
         map.add(
-            Animation::Idle,
-            SpriteAnimation {
+            PlayerAnimationType::Idle,
+            PlayerAnimation {
                 len: 5,
                 frame_time: 0.2,
                 path: "player/idle".to_string(),
             },
         );
         map.add(
-            Animation::Run,
-            SpriteAnimation {
+            PlayerAnimationType::Run,
+            PlayerAnimation {
                 len: 5,
                 frame_time: 0.12,
                 path: "player/run".to_string(),
@@ -70,8 +70,8 @@ impl FromWorld for PlayerAnimations {
         );
 
         map.add(
-            Animation::Jump,
-            SpriteAnimation {
+            PlayerAnimationType::Jump,
+            PlayerAnimation {
                 len: 1,
                 frame_time: 0.1,
                 path: "player/jump".to_string(),
@@ -79,8 +79,8 @@ impl FromWorld for PlayerAnimations {
         );
 
         map.add(
-            Animation::Fall,
-            SpriteAnimation {
+            PlayerAnimationType::Fall,
+            PlayerAnimation {
                 len: 1,
                 frame_time: 0.1,
                 path: "player/fall".to_string(),
@@ -137,14 +137,14 @@ fn change_player_animation(
             // to not play running animation when pressing jump and left or right at same time
             && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space, KeyCode::S, KeyCode::Down]) && vel.linvel.y > -VEL_LIMIT
     {
-        Animation::Run
+        PlayerAnimationType::Run
     } else if vel.linvel.y > VEL_LIMIT {
-        Animation::Jump
+        PlayerAnimationType::Jump
     } else if vel.linvel.y < -VEL_LIMIT {
         // cannot set to 0 due to rapier setting velocity to -0 sometimes for some reason
-        Animation::Fall
+        PlayerAnimationType::Fall
     } else {
-        Animation::Idle
+        PlayerAnimationType::Idle
     };
 
     // get SpriteAnimation data from Animation enum and set accordingly (this is very jerry-rigged for now.)

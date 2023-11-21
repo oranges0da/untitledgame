@@ -1,13 +1,13 @@
-use crate::animation;
-use crate::item;
+use crate::animation::{PlayerAnimation, PlayerAnimationType, PlayerAnimations};
+use crate::item::{PlayerItem, PlayerItems};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
     speed: f32, // movement speed of player on screen
-    pub animation: animation::SpriteAnimation,
-    pub item: Option<item::PlayerItem>,
+    pub animation: PlayerAnimation,
+    pub item: Option<PlayerItem>,
     pub frame_time: f32, // compare player frame_time to animation frame_time
 }
 
@@ -24,11 +24,11 @@ impl Plugin for PlayerPlugin {
 
 fn spawn_player(
     mut commands: Commands,
-    animation_res: Res<animation::PlayerAnimations>,
-    item_res: Res<item::PlayerItems>,
+    animation_res: Res<PlayerAnimations>,
+    item_res: Res<PlayerItems>,
 ) {
     // get current animation from global animation resource to use in Player component
-    let Some(animation) = animation_res.get(animation::Animation::Idle) else {
+    let Some(animation) = animation_res.get(PlayerAnimationType::Idle) else {
         error!("Failed to find animation: Idle");
         return;
     };
