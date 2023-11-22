@@ -7,8 +7,7 @@ pub struct ItemPlugin;
 impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerItems>()
-            .add_systems(Startup, spawn_player_item)
-            .add_systems(Update, animate_item)
+            .add_systems(Update, show_item)
             .add_systems(Update, show_item_ui);
     }
 }
@@ -52,11 +51,11 @@ impl FromWorld for PlayerItems {
         };
 
         items.add(
-            "peanut_butter".to_string(),
+            "ice_cream".to_string(),
             PlayerItem {
-                name: "Peanut Butter".to_string(),
+                name: "Ice Cream".to_string(),
                 item_type: ItemType::Food,
-                icon_path: "item/food/peanut_butter.png".to_string(),
+                icon_path: "item/food/ice_cream.png".to_string(),
                 index: 0,
             },
         );
@@ -66,15 +65,8 @@ impl FromWorld for PlayerItems {
 }
 
 // show current item in corner of screen
-fn show_item_ui(
-    mut commands: Commands,
-    item_res: Res<PlayerItems>,
-    asset_server: Res<AssetServer>,
-) {
-    // get current item (pb) and load its image
-    let Some(curr_item) = item_res.get("peanut_butter".to_string()) else {
-        return;
-    };
+fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, player: Query<&Player>) {
+    let player = player.single();
 
     commands
         .spawn(NodeBundle {
@@ -95,35 +87,27 @@ fn show_item_ui(
         })
         .with_children(|parent| {
             parent.spawn(ImageBundle {
-                image: asset_server.load(curr_item.clone().icon_path).into(),
+                image: asset_server
+                    .load(player.item.clone().unwrap().icon_path)
+                    .into(),
                 transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
                 ..default()
             });
         });
 }
 
-// spawn item in player's hands
-fn spawn_player_item(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands
-        .spawn(SpriteBundle {
-            texture: asset_server.load("item/food/peanut_butter.png").into(),
-            transform: Transform::from_translation(Vec3::new(100., 10., 2.))
-                .with_scale(Vec3::new(0.8, 0.8, 0.)),
-            ..default()
-        })
-        .insert(Item);
-}
-
-// animate item in player's hands
-fn animate_item(
-    player: Query<&Transform, With<Player>>,
-    mut item: Query<(&Item, &mut Transform), Without<Player>>,
+// show item in player's hands
+fn show_item(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    player: Query<(&Player, &Transform)>,
 ) {
-    let player_pos = player.single();
-    let Ok((_, mut item_pos)) = item.get_single_mut() else {
-        return;
-    };
+    let (player, pos) = player.single();
 
-    item_pos.translation.x = player_pos.translation.x + 25.;
-    item_pos.translation.y = player_pos.translation.y - 15.;
+    commands.spawn(ImageBundle {
+        image: asset_server
+            .load(player.item.clone().unwrap().icon_path)
+            .into(),
+        ..default()
+    });
 }

@@ -15,7 +15,8 @@ impl Plugin for AnimationPlugin {
     }
 }
 
-#[derive(Component, Eq, PartialEq, Hash, Debug)]
+// eq, partialeq, and hash necessary for enum to be inserted into HashMap
+#[derive(Component, Eq, PartialEq, Hash)]
 pub enum PlayerAnimationType {
     Idle,
     Run,
@@ -23,7 +24,7 @@ pub enum PlayerAnimationType {
     Fall,
 }
 
-#[derive(Component, Clone, Debug)]
+#[derive(Component, Clone)]
 pub struct PlayerAnimation {
     pub len: usize,
     pub frame_time: f32,

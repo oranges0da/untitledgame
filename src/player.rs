@@ -33,7 +33,7 @@ fn spawn_player(
         return;
     };
 
-    let Some(item) = item_res.get("peanut_butter".to_string()) else {
+    let Some(item) = item_res.get("ice_cream".to_string()) else {
         return;
     };
 
