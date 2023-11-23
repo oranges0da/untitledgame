@@ -7,7 +7,6 @@ pub struct ItemPlugin;
 impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerItems>()
-            .add_systems(Update, show_item)
             .add_systems(Update, show_item_ui);
     }
 }

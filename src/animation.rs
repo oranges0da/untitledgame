@@ -1,5 +1,7 @@
 use crate::player::Player;
+use crate::Mouse;
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 use bevy_rapier2d::prelude::*;
 use std::collections::HashMap;
 
@@ -11,7 +13,8 @@ impl Plugin for AnimationPlugin {
         app.init_resource::<PlayerAnimations>()
             .add_systems(Update, animate_player)
             .add_systems(Update, change_player_animation)
-            .add_systems(Update, flip_sprite);
+            .add_systems(Update, flip_sprite)
+            .add_systems(Update, animate_mouse);
     }
 }
 
@@ -192,5 +195,21 @@ fn flip_sprite(
         && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
     {
         sprite.flip_x = false;
+    }
+}
+
+// draw mouse to cursor's position
+fn animate_mouse(
+    player: Query<&Transform, With<Player>>,
+    mut mouse: Query<(&mut Transform, &Mouse), Without<Player>>,
+    q_window: Query<&Window, With<PrimaryWindow>>,
+) {
+    let pos = player.single();
+    let (mut mouse_pos, _) = mouse.single_mut();
+    let window = q_window.single();
+
+    if let Some(world_pos) = window.cursor_position() {
+        mouse_pos.translation.x = world_pos.x;
+        mouse_pos.translation.y = -world_pos.y;
     }
 }
