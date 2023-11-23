@@ -121,41 +121,49 @@ fn animate_player(
     }
 }
 
-// change player animation and texture_atlas (spritesheet) according to action
+// Change current player animation and spritesheet according to specified logic.
 fn change_player_animation(
     mut player: Query<&mut Player>,
     keyboard_input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    animations: Res<PlayerAnimations>,
+    animation_res: Res<PlayerAnimations>,
     mut texture_atlas_query: Query<&mut Handle<TextureAtlas>, With<Player>>,
     velocity: Query<&Velocity, With<Player>>,
 ) {
-    const VEL_LIMIT: f32 = 0.2;
+    // Cannot simply change jumping and falling animations when velocity is 0, since Bevy Rapier sometimes sets velocity to -0 for some reason.
+    const VEL_LIMIT: f32 = 0.001;
 
     let mut player = player.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
     let vel = velocity.single();
 
-    let curr_animation_id = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
-            // to not play running animation when pressing jump and left or right at same time
-            && !keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space, KeyCode::S, KeyCode::Down]) && vel.linvel.y > -VEL_LIMIT
-    {
-        PlayerAnimationType::Run
-    } else if vel.linvel.y > VEL_LIMIT {
-        PlayerAnimationType::Jump
-    } else if vel.linvel.y < -VEL_LIMIT {
-        // cannot set to 0 due to rapier setting velocity to -0 sometimes for some reason
-        PlayerAnimationType::Fall
-    } else {
-        PlayerAnimationType::Idle
-    };
+    let curr_animation_id =
+        if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
+            && !keyboard_input.any_pressed([
+                KeyCode::W,
+                KeyCode::Up,
+                KeyCode::Space,
+                KeyCode::S,
+                KeyCode::Down,
+            ])
+            && vel.linvel.y > -VEL_LIMIT
+        {
+            PlayerAnimationType::Run
+        } else if vel.linvel.y > VEL_LIMIT {
+            PlayerAnimationType::Jump
+        } else if vel.linvel.y < -VEL_LIMIT {
+            PlayerAnimationType::Fall
+        } else {
+            PlayerAnimationType::Idle
+        };
 
-    // get SpriteAnimation data from Animation enum and set accordingly (this is very jerry-rigged for now.)
-    let Some(new_animation) = animations.get(curr_animation_id) else {
+    // Get animation object from global animation resource created in FromWorld.
+    let Some(new_animation) = animation_res.get(curr_animation_id) else {
         return ();
     };
 
+    // Set path to item spritesheet if player is currently holding item.
     let path = if player.item.is_some() {
         let mut new_path = new_animation.path.clone();
         new_path.push_str("_item.png");
@@ -166,13 +174,13 @@ fn change_player_animation(
         new_path
     };
 
-    // load spritesheet and split into grid of individual sprites and convert to spritesheet handle
+    // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path);
     let texture_atlas =
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 32.), 5, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
-    // set current animation and correct spritesheet
+    // Set player's animation and spritesheet to relevant data.
     player.animation = new_animation;
     *atlas = texture_atlas_handle;
 }
@@ -183,7 +191,8 @@ fn flip_sprite(
 ) {
     let mut sprite = player_sprite.single_mut();
 
-    // flip sprite on x axis when going from left to right, or vice-verse
+    // Flip sprite on x-axis when changing directions.
+    // Player sprite spawns facing to the right direction, so flipping when moving left necessary.
     if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
         sprite.flip_x = true;
     } else if keyboard_input.any_just_pressed([KeyCode::D, KeyCode::Right])
@@ -198,7 +207,7 @@ fn flip_sprite(
     }
 }
 
-// draw mouse to cursor's position
+// Draw mouse sprite to cursor position.
 fn animate_mouse(
     mut mouse: Query<(&mut Transform, &Mouse), Without<Player>>,
     q_window: Query<&Window, With<PrimaryWindow>>,
