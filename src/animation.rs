@@ -200,16 +200,15 @@ fn flip_sprite(
 
 // draw mouse to cursor's position
 fn animate_mouse(
-    player: Query<&Transform, With<Player>>,
     mut mouse: Query<(&mut Transform, &Mouse), Without<Player>>,
     q_window: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let pos = player.single();
     let (mut mouse_pos, _) = mouse.single_mut();
     let window = q_window.single();
 
     if let Some(world_pos) = window.cursor_position() {
-        mouse_pos.translation.x = world_pos.x;
-        mouse_pos.translation.y = -world_pos.y;
+        // rough coordinates
+        mouse_pos.translation.x = world_pos.x - 310.;
+        mouse_pos.translation.y = -world_pos.y + 200.;
     }
 }

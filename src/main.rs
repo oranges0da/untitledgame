@@ -81,8 +81,8 @@ fn spawn_mouse(
     commands
         .spawn(SpriteSheetBundle {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_translation(Vec3::new(100., 100., 0.))
-                .with_scale(Vec3::new(2., 2., 0.)),
+            transform: Transform::from_translation(Vec3::new(0., 0., 0.))
+                .with_scale(Vec3::new(1.5, 1.5, 0.)),
             sprite: TextureAtlasSprite {
                 index: 0,
                 ..default()
