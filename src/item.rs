@@ -94,19 +94,3 @@ fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, player: 
             });
         });
 }
-
-// show item in player's hands
-fn show_item(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    player: Query<(&Player, &Transform)>,
-) {
-    let (player, pos) = player.single();
-
-    commands.spawn(ImageBundle {
-        image: asset_server
-            .load(player.item.clone().unwrap().icon_path)
-            .into(),
-        ..default()
-    });
-}

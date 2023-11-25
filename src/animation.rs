@@ -18,7 +18,7 @@ impl Plugin for AnimationPlugin {
     }
 }
 
-// eq, partialeq, and hash necessary for enum to be inserted into HashMap
+// Eq, PartialEq, and Hash necessary for enum to be inserted into HashMap.
 #[derive(Component, Eq, PartialEq, Hash)]
 pub enum PlayerAnimationType {
     Idle,
@@ -49,7 +49,7 @@ impl PlayerAnimations {
     }
 }
 
-// init PlayerAnimations resource with from_world and add animation data
+// Initialize a Bevy resource for player's animations, and add each animation to resource.
 impl FromWorld for PlayerAnimations {
     fn from_world(_world: &mut World) -> Self {
         let mut map = PlayerAnimations {
@@ -95,27 +95,26 @@ impl FromWorld for PlayerAnimations {
     }
 }
 
-// fundamental animation logic, will be the same for any animation implemented
+// Animation logic for animating player.
 fn animate_player(
-    mut player_query: Query<(&mut Player, &mut TextureAtlasSprite), With<Player>>, // cannot include TextureAtlasSprite in Player{} due to the way Bevy renders entities
+    mut player_query: Query<(&mut Player, &mut TextureAtlasSprite), With<Player>>,
     time: Res<Time>,
 ) {
     for (mut player, mut sprite) in player_query.iter_mut() {
-        // get time elapsed (f32) since last frame
         player.frame_time += time.delta_seconds();
 
         if player.frame_time > player.animation.frame_time {
             let frames_elapsed = player.frame_time / player.animation.frame_time;
 
-            // animate!
+            // Animate!
             sprite.index += frames_elapsed as usize;
 
-            // if sprite index becomes greater than length of total animation frames, reset sprite index
+            // If sprite index becomes greater than length of total animation frames, reset sprite index. (To restart animation.)
             if sprite.index >= player.animation.len {
                 sprite.index %= player.animation.len;
             }
 
-            // subtract total frames from frame_time as to not accumulate in frame_time
+            // Subtract total frames from frame_time as to not accumulate in frame_time.
             player.frame_time -= player.animation.frame_time * frames_elapsed as f32;
         }
     }
