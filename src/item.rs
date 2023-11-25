@@ -38,7 +38,7 @@ impl PlayerItems {
     }
 
     pub fn get(&self, id: String) -> Option<PlayerItem> {
-        self.items.get(&id).cloned()
+        return self.items.get(&id).cloned();
     }
 }
 
