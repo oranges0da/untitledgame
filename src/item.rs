@@ -24,7 +24,6 @@ pub struct PlayerItem {
     name: String,
     item_type: ItemType,
     icon_path: String,
-    index: i32,
 }
 
 #[derive(Resource)]
