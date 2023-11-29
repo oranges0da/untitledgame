@@ -47,7 +47,7 @@ fn spawn_player(
             Player {
                 speed: 200.,
                 animation,
-                item: Some(item),
+                item: None,
                 frame_time: 0.6,
             },
         ))
