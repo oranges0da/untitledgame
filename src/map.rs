@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
@@ -11,12 +11,25 @@ impl Plugin for MapPlugin {
     }
 }
 
-fn spawn_bg(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // spawn earth in background
+fn spawn_bg(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    // Spawn earth in background as it would appear on the moon.
     commands.spawn(SpriteBundle {
         texture: asset_server.load("map/earth.png"),
-        transform: Transform::from_translation(Vec3::new(-100., 100., -1.))
-            .with_scale(Vec3::new(2., 2., 0.)),
+        transform: Transform::from_translation(Vec3::new(0., 0., -1.))
+            .with_scale(Vec3::new(8., 8., 0.)),
+        ..default()
+    });
+
+    // Spawn "star".
+    commands.spawn(MaterialMesh2dBundle {
+        mesh: meshes.add(shape::Circle::new(1.5).into()).into(),
+        material: materials.add(ColorMaterial::from(Color::WHITE)),
+        transform: Transform::from_translation(Vec3::new(-200., 0., 0.)),
         ..default()
     });
 }
@@ -41,6 +54,7 @@ fn spawn_map(
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
+    // Spawn ground with tiles from spritesheet.
     for x in -50..50 {
         commands
             .spawn(SpriteSheetBundle {
@@ -58,5 +72,22 @@ fn spawn_map(
                 ..default()
             })
             .insert(Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.));
+
+        for y in -300..=GROUND_LEVEL as i32 {
+            commands.spawn(SpriteSheetBundle {
+                texture_atlas: texture_atlas_handle.clone(),
+                sprite: TextureAtlasSprite {
+                    index: 1,
+                    ..default()
+                },
+                transform: Transform::from_translation(Vec3::new(
+                    x as f32 * TILE_SIZE * SCALE,
+                    y as f32,
+                    1.,
+                ))
+                .with_scale(Vec3::new(SCALE, SCALE, 0.)),
+                ..default()
+            });
+        }
     }
 }
