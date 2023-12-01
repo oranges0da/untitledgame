@@ -1,5 +1,5 @@
 use crate::animation::{PlayerAnimation, PlayerAnimationType, PlayerAnimations};
-use crate::item::{PlayerItem, PlayerItems};
+use crate::item::PlayerItem;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -22,26 +22,21 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn spawn_player(
-    mut commands: Commands,
-    animation_res: Res<PlayerAnimations>,
-    item_res: Res<PlayerItems>,
-) {
+fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
     // get current animation from global animation resource to use in Player component
     let Some(animation) = animation_res.get(PlayerAnimationType::Idle) else {
         error!("Failed to find animation: Idle");
         return;
     };
 
-    let Some(item) = item_res.get("ice_cream".to_string()) else {
-        return;
-    };
-
     commands
         .spawn((
             SpriteSheetBundle {
-                transform: Transform::from_scale(Vec3::new(2.2, 2.2, 0.))
-                    .with_translation(Vec3::new(0., 0., 1.)), // z field of translation vector will determine z-index (overlay player over background)
+                transform: Transform {
+                    scale: Vec3::new(2.2, 2.2, 0.),
+                    translation: Vec3::new(0., 0., 1.), // Setting z-index to 1 will make sure player is drawn over everything else.
+                    ..default()
+                },
                 ..default()
             },
             Player {

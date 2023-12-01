@@ -20,18 +20,22 @@ fn spawn_bg(
     // Spawn earth in background as it would appear on the moon.
     commands.spawn(SpriteBundle {
         texture: asset_server.load("map/earth.png"),
-        transform: Transform::from_translation(Vec3::new(0., 0., -1.))
-            .with_scale(Vec3::new(8., 8., 0.)),
+        transform: Transform {
+            translation: Vec3::new(0., 0., -1.),
+            scale: Vec3::new(8., 8., 0.),
+            ..default()
+        }
+        .with_scale(Vec3::new(8., 8., 0.)),
         ..default()
     });
 
-    // Spawn "star".
-    commands.spawn(MaterialMesh2dBundle {
-        mesh: meshes.add(shape::Circle::new(1.5).into()).into(),
-        material: materials.add(ColorMaterial::from(Color::WHITE)),
-        transform: Transform::from_translation(Vec3::new(-200., 0., 0.)),
-        ..default()
-    });
+    // Spawn "star" (not working right now).
+    // commands.spawn(MaterialMesh2dBundle {
+    //     mesh: meshes.add(shape::Circle::new(1.5).into()).into(),
+    //     material: materials.add(ColorMaterial::from(Color::WHITE)),
+    //     transform: Transform::from_translation(Vec3::new(-200., 0., 0.)),
+    //     ..default()
+    // });
 }
 
 fn spawn_map(
@@ -63,12 +67,11 @@ fn spawn_map(
                     index: 1,
                     ..default()
                 },
-                transform: Transform::from_translation(Vec3::new(
-                    x as f32 * TILE_SIZE * SCALE,
-                    GROUND_LEVEL,
-                    1.,
-                ))
-                .with_scale(Vec3::new(SCALE, SCALE, 0.)),
+                transform: Transform {
+                    translation: Vec3::new(x as f32 * TILE_SIZE * SCALE, GROUND_LEVEL, 1.),
+                    scale: Vec3::new(SCALE, SCALE, 0.),
+                    ..default()
+                },
                 ..default()
             })
             .insert(Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.));
@@ -80,12 +83,11 @@ fn spawn_map(
                     index: 1,
                     ..default()
                 },
-                transform: Transform::from_translation(Vec3::new(
-                    x as f32 * TILE_SIZE * SCALE,
-                    y as f32,
-                    1.,
-                ))
-                .with_scale(Vec3::new(SCALE, SCALE, 0.)),
+                transform: Transform {
+                    translation: Vec3::new(x as f32 * TILE_SIZE * SCALE, y as f32, 1.),
+                    scale: Vec3::new(SCALE, SCALE, 0.),
+                    ..default()
+                },
                 ..default()
             });
         }
