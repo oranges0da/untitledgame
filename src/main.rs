@@ -13,13 +13,13 @@ fn main() {
     App::new()
         .add_plugins(
             DefaultPlugins
-                .set(ImagePlugin::default_nearest()) // necessary to not spawn blurry sprites
+                .set(ImagePlugin::default_nearest()) // Necessary to not spawn blurry sprites.
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "Untitled Game".into(),
                         resolution: (640., 480.).into(),
                         present_mode: PresentMode::AutoVsync,
-                        // Tells wasm to resize the window according to the available canvas
+                        // Tells wasm to resize the window according to the available canvas.
                         fit_canvas_to_parent: true,
                         // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
                         prevent_default_event_handling: false,
@@ -28,7 +28,7 @@ fn main() {
                     ..default()
                 }),
         )
-        .insert_resource(ClearColor(Color::rgb(0., 0., 0.))) // set background color to black (outer space!)
+        .insert_resource(ClearColor(Color::rgb(0., 0., 0.))) // Set background color to black. (outer space!)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(32.))
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(camera::CameraPlugin)

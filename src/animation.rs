@@ -128,7 +128,7 @@ fn change_player_animation(
     velocity: Query<&Velocity, With<Player>>,
 ) {
     // Cannot simply change jumping and falling animations when velocity is 0, since Bevy Rapier sometimes sets velocity to -0 for some reason.
-    const VEL_LIMIT: f32 = 0.002;
+    const VEL_LIMIT: f32 = 0.01;
 
     let mut player = player.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
@@ -144,6 +144,7 @@ fn change_player_animation(
                 KeyCode::Down,
             ])
             && vel.linvel.y < VEL_LIMIT
+            && vel.linvel.y > -VEL_LIMIT
         {
             PlayerAnimationType::Run
         } else if vel.linvel.y > VEL_LIMIT {
