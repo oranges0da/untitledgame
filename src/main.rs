@@ -3,6 +3,7 @@ use bevy::window::PresentMode;
 use bevy_rapier2d::prelude::*;
 
 mod animation;
+mod debug;
 mod item;
 mod map;
 mod player;
@@ -28,10 +29,11 @@ fn main() {
         )
         .insert_resource(ClearColor(Color::rgb(0., 0., 0.))) // set background color to black (outer space!)
         .add_systems(Startup, setup)
-        .add_systems(Update, follow_player)
         .add_systems(Startup, spawn_mouse)
+        .add_systems(Update, follow_player)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(32.))
         .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(debug::DebugPlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(animation::AnimationPlugin)
         .add_plugins(map::MapPlugin)
