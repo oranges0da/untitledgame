@@ -1,5 +1,5 @@
 use crate::animation::{PlayerAnimation, PlayerAnimationType, PlayerAnimations};
-use crate::item::PlayerItem;
+use crate::item::{PlayerItem, PlayerItems};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -22,10 +22,19 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
-    // get current animation from global animation resource to use in Player component
+fn spawn_player(
+    mut commands: Commands,
+    animation_res: Res<PlayerAnimations>,
+    item_res: Res<PlayerItems>,
+) {
+    // Get idle animation to play on spawn.
     let Some(animation) = animation_res.get(PlayerAnimationType::Idle) else {
         error!("Failed to find animation: Idle");
+        return;
+    };
+
+    // Get some item for player to hold. (Testing reasons!)
+    let Some(item) = item_res.get("ice_cream".to_string()) else {
         return;
     };
 
@@ -42,7 +51,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
             Player {
                 speed: 200.,
                 animation,
-                item: None,
+                item: Some(item),
                 frame_time: 0.6,
             },
         ))
@@ -61,9 +70,7 @@ fn move_player(
     if let Ok((player, mut player_pos)) = player_query.get_single_mut() {
         let mut direction = Vec3::ZERO;
 
-        if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-            && player_pos.translation.x < 480.
-        {
+        if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
             direction += Vec3::new(-100., 0., 0.);
         }
 
@@ -92,7 +99,7 @@ fn player_jump(
         panic!("Could not parse player query in player_jump.");
     };
 
-    if keyboard_input.pressed(KeyCode::Up) {
+    if keyboard_input.any_pressed([KeyCode::Up, KeyCode::Space, KeyCode::W]) {
         vel.linvel.y = 100.;
     } else {
         vel.linvel.y = vel.linvel.y.min(0.0);
