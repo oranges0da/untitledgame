@@ -1,3 +1,4 @@
+use crate::item::Item;
 use crate::player::Player;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -9,6 +10,7 @@ pub struct AnimationPlugin;
 impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerAnimations>()
+            .add_systems(Update, animate_item)
             .add_systems(Update, animate_player)
             .add_systems(Update, change_player_animation)
             .add_systems(Update, flip_sprite);
@@ -90,6 +92,18 @@ impl FromWorld for PlayerAnimations {
 
         map
     }
+}
+
+// Animation logic for animating item in player's hands. (Swaying animation sort of.)
+fn animate_item(
+    player_q: Query<&Transform, With<Player>>,
+    mut item_q: Query<(&mut Transform, &Item), Without<Player>>,
+) {
+    let player_pos = player_q.single();
+    let (mut item_pos, _) = item_q.single_mut();
+
+    item_pos.translation.x = player_pos.translation.x + 20.;
+    item_pos.translation.y = player_pos.translation.y - 10.;
 }
 
 // Animation logic for animating player.
@@ -184,14 +198,17 @@ fn change_player_animation(
 
 fn flip_sprite(
     mut player_sprite: Query<&mut TextureAtlasSprite, With<Player>>,
+    mut item_q: Query<&mut Transform, With<Item>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
     let mut sprite = player_sprite.single_mut();
+    let mut item_pos = item_q.single_mut();
 
     // Flip sprite on x-axis when changing directions.
     // Player sprite spawns facing to the right direction, so flipping when moving left necessary.
     if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
         sprite.flip_x = true;
+        item_pos.translation.x -= 20.;
     } else if keyboard_input.any_just_pressed([KeyCode::D, KeyCode::Right])
         && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
     {

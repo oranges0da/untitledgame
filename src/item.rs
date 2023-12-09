@@ -7,6 +7,7 @@ pub struct ItemPlugin;
 impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerItems>()
+            .add_systems(Startup, spawn_item)
             .add_systems(Update, show_item_ui);
     }
 }
@@ -95,4 +96,18 @@ fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, player: 
                 });
             });
     }
+}
+
+// Spawn item in player's hands.
+fn spawn_item(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands
+        .spawn(SpriteBundle {
+            texture: asset_server.load("item/food/ice_cream.png"),
+            transform: Transform {
+                translation: Vec3::new(10., 10., 10.),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Item);
 }
