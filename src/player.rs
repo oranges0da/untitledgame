@@ -5,10 +5,10 @@ use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
-    speed: f32, // movement speed of player on screen
+    speed: f32,
     pub animation: PlayerAnimation,
     pub item: Option<PlayerItem>,
-    pub frame_time: f32, // compare player frame_time to animation frame_time
+    pub frame_time: f32, // To compare player's frame_time to animation's frame_time.
 }
 
 #[derive(Component)]
@@ -33,7 +33,7 @@ fn spawn_player(
         return;
     };
 
-    // Get some item for player to hold. (Testing reasons!)
+    // Get item for player to hold. (Testing reasons!)
     let Some(item) = item_res.get("ice_cream".to_string()) else {
         return;
     };
@@ -57,8 +57,8 @@ fn spawn_player(
         ))
         .insert(RigidBody::Dynamic)
         .insert(Velocity::default())
-        .insert(AdditionalMassProperties::Mass(10.0)) // set mass of player
-        .insert(GravityScale(2.0)) // subject player to gravity
+        .insert(AdditionalMassProperties::Mass(10.0)) // Set mass of player.
+        .insert(GravityScale(2.0)) // Subject player body to gravity.
         .insert(Collider::cuboid(12., 16.));
 }
 
