@@ -16,6 +16,16 @@ pub struct Item {
     pub current_item: Option<PlayerItem>, // None if player has no items.
 }
 
+impl Item {
+    pub fn is_holding_item(&self) -> bool {
+        self.current_item.is_some()
+    }
+
+    pub fn get_current_item(&self) -> Option<&PlayerItem> {
+        self.current_item.as_ref()
+    }
+}
+
 #[derive(Clone, Debug)]
 enum ItemType {
     Food,
