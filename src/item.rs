@@ -6,11 +6,12 @@ pub struct ItemPlugin;
 impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerItems>()
-            .add_systems(Update, show_item_ui);
+            .add_systems(Update, show_item_ui)
+            .add_systems(Startup, spawn_idle_item);
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Item {
     pub position: Vec3,
     pub current_item: Option<PlayerItem>, // None if player has no items.
@@ -105,4 +106,23 @@ fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, item: Qu
                 });
             });
     }
+}
+
+// Spawn item that player can pickup.
+fn spawn_idle_item(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    item_res: Res<PlayerItems>,
+) {
+    let current_item = item_res.get("ice_cream".to_string()).unwrap();
+    let item = Item {
+        position: Vec3::new(-20., 0., 0.),
+        current_item: item_res.get("ice_cream".to_string()),
+    };
+
+    commands.spawn(SpriteBundle {
+        texture: asset_server.load(current_item.clone().icon_path),
+        transform: Transform::from_translation(item.position),
+        ..default()
+    });
 }
