@@ -1,4 +1,3 @@
-use crate::player::Player;
 use bevy::prelude::*;
 use std::collections::HashMap;
 
@@ -7,13 +6,15 @@ pub struct ItemPlugin;
 impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerItems>()
-            .add_systems(Startup, spawn_item)
             .add_systems(Update, show_item_ui);
     }
 }
 
 #[derive(Component)]
-pub struct Item;
+pub struct Item {
+    pub position: Vec3,
+    pub current_item: Option<PlayerItem>, // None if player has no items.
+}
 
 #[derive(Clone, Debug)]
 enum ItemType {
@@ -64,11 +65,9 @@ impl FromWorld for PlayerItems {
     }
 }
 
-// show current item in corner of screen
-fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, player: Query<&Player>) {
-    let player = player.single();
-
-    if player.item.is_some() {
+// Show current item in corner of screen with nice ui. (Only if player is holding an item of course.)
+fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, item: Query<&Item>) {
+    if let Ok(item) = item.get_single() {
         commands
             .spawn(NodeBundle {
                 style: Style {
@@ -89,25 +88,11 @@ fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, player: 
             .with_children(|parent| {
                 parent.spawn(ImageBundle {
                     image: asset_server
-                        .load(player.item.clone().unwrap().icon_path)
+                        .load(item.current_item.clone().unwrap().icon_path)
                         .into(),
                     transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
                     ..default()
                 });
             });
     }
-}
-
-// Spawn item in player's hands.
-fn spawn_item(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands
-        .spawn(SpriteBundle {
-            texture: asset_server.load("item/food/ice_cream.png"),
-            transform: Transform {
-                translation: Vec3::new(10., 10., 10.),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(Item);
 }

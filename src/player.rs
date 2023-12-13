@@ -1,5 +1,4 @@
 use crate::animation::{PlayerAnimation, PlayerAnimationType, PlayerAnimations};
-use crate::item::{PlayerItem, PlayerItems};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -7,7 +6,6 @@ use bevy_rapier2d::prelude::*;
 pub struct Player {
     speed: f32,
     pub animation: PlayerAnimation,
-    pub item: Option<PlayerItem>,
     pub frame_time: f32, // To compare player's frame_time to animation's frame_time.
 }
 
@@ -22,19 +20,10 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn spawn_player(
-    mut commands: Commands,
-    animation_res: Res<PlayerAnimations>,
-    item_res: Res<PlayerItems>,
-) {
+fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
     // Get idle animation to play on spawn.
     let Some(animation) = animation_res.get(PlayerAnimationType::Idle) else {
         error!("Failed to find animation: Idle");
-        return;
-    };
-
-    // Get item for player to hold. (Testing reasons!)
-    let Some(item) = item_res.get("ice_cream".to_string()) else {
         return;
     };
 
@@ -51,7 +40,6 @@ fn spawn_player(
             Player {
                 speed: 200.,
                 animation,
-                item: Some(item),
                 frame_time: 0.6,
             },
         ))
