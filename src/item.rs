@@ -116,7 +116,7 @@ fn spawn_idle_item(
 ) {
     let current_item = item_res.get("ice_cream".to_string()).unwrap();
     let item = Item {
-        position: Vec3::new(-20., 0., 0.),
+        position: Vec3::new(-20., -60., 0.),
         current_item: item_res.get("ice_cream".to_string()),
     };
 

@@ -1,3 +1,4 @@
+use crate::item::Item;
 use crate::player::Player;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -193,4 +194,9 @@ fn flip_sprite(
     {
         sprite.flip_x = false;
     }
+}
+
+// Animate idle item on ground.
+fn animate_idle_item(mut item_q: Query<&mut Transform, With<Item>>, time: Res<Time>) {
+    let item_pos = item_q.single_mut();
 }
