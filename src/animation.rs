@@ -12,7 +12,8 @@ impl Plugin for AnimationPlugin {
         app.init_resource::<PlayerAnimations>()
             .add_systems(Update, animate_player)
             .add_systems(Update, change_player_animation)
-            .add_systems(Update, flip_sprite);
+            .add_systems(Update, flip_sprite)
+            .add_systems(Update, animate_idle_item);
     }
 }
 
@@ -197,5 +198,4 @@ fn flip_sprite(
 }
 
 // Animate idle item on ground.
-fn animate_idle_item(mut item_q: Query<&mut Transform, With<Item>>, time: Res<Time>) {
-}
+fn animate_idle_item(mut item_q: Query<&mut Transform, With<Item>>, time: Res<Time>) {}

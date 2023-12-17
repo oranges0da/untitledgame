@@ -126,9 +126,12 @@ fn spawn_idle_item(
         item_res.get("ice_cream".to_string()),
     );
 
-    commands.spawn(SpriteBundle {
-        texture: asset_server.load(item.current_item.unwrap().clone().icon_path),
-        transform: Transform::from_translation(item.position),
-        ..default()
-    });
+    commands.spawn((
+        SpriteBundle {
+            texture: asset_server.load(&item.current_item.as_ref().unwrap().icon_path),
+            transform: Transform::from_translation(item.position),
+            ..default()
+        },
+        item,
+    ));
 }
