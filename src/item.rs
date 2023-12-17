@@ -18,6 +18,13 @@ pub struct Item {
 }
 
 impl Item {
+    pub fn new(position: Vec3, current_item: Option<PlayerItem>) -> Self {
+        Item {
+            position,
+            current_item,
+        }
+    }
+
     pub fn is_holding_item(&self) -> bool {
         self.current_item.is_some()
     }
@@ -108,20 +115,19 @@ fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, item: Qu
     }
 }
 
-// Spawn item that player can pickup.
+// Spawn idle item that player can pickup.
 fn spawn_idle_item(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     item_res: Res<PlayerItems>,
 ) {
-    let current_item = item_res.get("ice_cream".to_string()).unwrap();
-    let item = Item {
-        position: Vec3::new(-20., -60., 0.),
-        current_item: item_res.get("ice_cream".to_string()),
-    };
+    let item = Item::new(
+        Vec3::new(-20., -60., 0.),
+        item_res.get("ice_cream".to_string()),
+    );
 
     commands.spawn(SpriteBundle {
-        texture: asset_server.load(current_item.clone().icon_path),
+        texture: asset_server.load(item.current_item.unwrap().clone().icon_path),
         transform: Transform::from_translation(item.position),
         ..default()
     });

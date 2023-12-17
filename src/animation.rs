@@ -198,5 +198,4 @@ fn flip_sprite(
 
 // Animate idle item on ground.
 fn animate_idle_item(mut item_q: Query<&mut Transform, With<Item>>, time: Res<Time>) {
-    let item_pos = item_q.single_mut();
 }
