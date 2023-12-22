@@ -122,7 +122,7 @@ fn spawn_idle_item(
     item_res: Res<PlayerItems>,
 ) {
     let item = Item::new(
-        Vec3::new(-20., -60., 0.),
+        Vec3::new(-20., -70., 0.),
         item_res.get("ice_cream".to_string()),
     );
 

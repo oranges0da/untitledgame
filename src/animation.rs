@@ -198,4 +198,6 @@ fn flip_sprite(
 }
 
 // Animate idle item on ground.
-fn animate_idle_item(mut item_q: Query<&mut Transform, With<Item>>, time: Res<Time>) {}
+fn animate_idle_item(mut item_q: Query<&mut Transform, With<Item>>, time: Res<Time>) {
+    info!("Frame time: {}", time.delta_seconds());
+}
