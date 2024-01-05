@@ -7,7 +7,7 @@ pub struct MapPlugin;
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_map)
-            .add_systems(Update, spawn_bg);
+            .add_systems(Startup, spawn_bg);
     }
 }
 
@@ -76,7 +76,7 @@ fn spawn_map(
             })
             .insert(Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.));
 
-        for y in -300..=GROUND_LEVEL as i32 {
+        for y in -1..=GROUND_LEVEL as i32 {
             commands.spawn(SpriteSheetBundle {
                 texture_atlas: texture_atlas_handle.clone(),
                 sprite: TextureAtlasSprite {

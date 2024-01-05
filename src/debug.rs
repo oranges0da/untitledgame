@@ -9,7 +9,7 @@ impl Plugin for DebugPlugin {
         app.init_resource::<FrameRate>()
             .add_plugins(LogDiagnosticsPlugin::default())
             .add_plugins(FrameTimeDiagnosticsPlugin::default())
-            .add_systems(Startup, spawn_fps)
+            .add_systems(Startup, spawn_fps_text)
             .add_systems(Update, update_fps)
             .add_systems(Update, update_fps_text);
     }
@@ -22,7 +22,7 @@ struct FrameRate(f64);
 struct FrameRateText;
 
 // Spawn FPS in corner of screen.
-fn spawn_fps(mut commands: Commands, frame_rate: Res<FrameRate>) {
+fn spawn_fps_text(mut commands: Commands, frame_rate: Res<FrameRate>) {
     commands
         .spawn(TextBundle {
             text: Text::from_section(
