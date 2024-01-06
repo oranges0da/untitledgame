@@ -151,7 +151,7 @@ fn change_player_animation(
             && vel.linvel.y > -VEL_LIMIT 
         {
             PlayerAnimationType::Run
-        } else if vel.linvel.y > VEL_LIMIT {
+        } else if vel.linvel.y > VEL_LIMIT && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
             PlayerAnimationType::Jump
         } else if vel.linvel.y < -VEL_LIMIT {
             PlayerAnimationType::Fall
@@ -174,7 +174,9 @@ fn change_player_animation(
 
     // Set player's animation and spritesheet to relevant data.
     player.animation = new_animation;
-    *atlas = texture_atlas_handle;
+    if *atlas != texture_atlas_handle {
+        *atlas = texture_atlas_handle
+    }
 }
 
 fn flip_sprite(
