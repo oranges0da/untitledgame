@@ -149,12 +149,11 @@ fn change_player_animation(
             ])
             && vel.linvel.y < VEL_LIMIT
             && vel.linvel.y > -VEL_LIMIT 
-            && grounded.0
         {
             PlayerAnimationType::Run
-        } else if vel.linvel.y > VEL_LIMIT && !grounded.0 {
+        } else if vel.linvel.y > VEL_LIMIT {
             PlayerAnimationType::Jump
-        } else if vel.linvel.y < -VEL_LIMIT && !grounded.0 {
+        } else if vel.linvel.y < -VEL_LIMIT {
             PlayerAnimationType::Fall
         } else {
             PlayerAnimationType::Idle

@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
@@ -28,14 +28,6 @@ fn spawn_bg(
         .with_scale(Vec3::new(8., 8., 0.)),
         ..default()
     });
-
-    // Spawn "star" (not working right now).
-    // commands.spawn(MaterialMesh2dBundle {
-    //     mesh: meshes.add(shape::Circle::new(1.5).into()).into(),
-    //     material: materials.add(ColorMaterial::from(Color::WHITE)),
-    //     transform: Transform::from_translation(Vec3::new(-200., 0., 0.)),
-    //     ..default()
-    // });
 }
 
 fn spawn_map(
@@ -76,7 +68,7 @@ fn spawn_map(
             })
             .insert(Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.));
 
-        for y in -1..=GROUND_LEVEL as i32 {
+        for y in -300..=GROUND_LEVEL as i32 {
             commands.spawn(SpriteSheetBundle {
                 texture_atlas: texture_atlas_handle.clone(),
                 sprite: TextureAtlasSprite {

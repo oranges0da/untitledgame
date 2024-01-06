@@ -16,7 +16,8 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
             .add_systems(Update, move_player)
-            .add_systems(Update, player_jump);
+            .add_systems(Update, player_jump)
+            .add_systems(Update, ground_detection);
     }
 }
 
@@ -99,4 +100,8 @@ fn player_jump(
 pub struct Grounded(pub bool);
 
 // Detect if player is grounded and set accordingly.
-fn ground_detection(mut grounded_q: Query<&mut Grounded, With<Player>>) {}
+fn ground_detection(mut player_q: Query<(&Transform, &mut Grounded), With<Player>>) {
+    for (pos, mut grounded) in &mut player_q {
+        info!("Position: {}", pos.translation.y);
+    }
+}
