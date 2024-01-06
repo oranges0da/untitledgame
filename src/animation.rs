@@ -1,5 +1,5 @@
 use crate::item::Item;
-use crate::player::Player;
+use crate::player::{Player, Grounded};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::collections::HashMap;
@@ -121,7 +121,8 @@ fn animate_player(
 
 // Change current player animation and spritesheet according to specified logic.
 fn change_player_animation(
-    mut player: Query<&mut Player>,
+    mut player_q: Query<&mut Player>,
+    grounded_q: Query<&Grounded, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
@@ -132,7 +133,8 @@ fn change_player_animation(
     // Cannot simply change jumping and falling animations when velocity is 0, since Bevy Rapier sometimes sets velocity to -0 for some reason.
     const VEL_LIMIT: f32 = 0.02;
 
-    let mut player = player.single_mut();
+    let grounded = grounded_q.single();
+    let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
     let vel = velocity.single();
 
@@ -146,12 +148,13 @@ fn change_player_animation(
                 KeyCode::Down,
             ])
             && vel.linvel.y < VEL_LIMIT
-            && vel.linvel.y > -VEL_LIMIT
+            && vel.linvel.y > -VEL_LIMIT 
+            && grounded.0
         {
             PlayerAnimationType::Run
-        } else if vel.linvel.y > VEL_LIMIT {
+        } else if vel.linvel.y > VEL_LIMIT && !grounded.0 {
             PlayerAnimationType::Jump
-        } else if vel.linvel.y < -VEL_LIMIT {
+        } else if vel.linvel.y < -VEL_LIMIT && !grounded.0 {
             PlayerAnimationType::Fall
         } else {
             PlayerAnimationType::Idle
@@ -198,6 +201,4 @@ fn flip_sprite(
 }
 
 // Animate idle item on ground.
-fn animate_idle_item(mut item_q: Query<&mut Transform, With<Item>>, time: Res<Time>) {
-    info!("Frame time: {}", time.delta_seconds());
-}
+fn animate_idle_item(mut item_q: Query<&mut Transform, With<Item>>, time: Res<Time>) {}

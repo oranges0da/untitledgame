@@ -43,6 +43,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
                 frame_time: 0.6,
             },
         ))
+        .insert(Grounded(true))
         .insert(RigidBody::Dynamic)
         .insert(Velocity::default())
         .insert(AdditionalMassProperties::Mass(10.0)) // Set mass of player.
@@ -93,3 +94,9 @@ fn player_jump(
         vel.linvel.y = vel.linvel.y.min(0.0);
     }
 }
+
+#[derive(Component)]
+pub struct Grounded(pub bool);
+
+// Detect if player is grounded and set accordingly.
+fn ground_detection(mut grounded_q: Query<&mut Grounded, With<Player>>) {}
