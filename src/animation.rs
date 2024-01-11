@@ -122,21 +122,19 @@ fn animate_player(
 // Change current player animation and spritesheet according to specified logic.
 fn change_player_animation(
     mut player_q: Query<&mut Player>,
-    grounded_q: Query<&Grounded, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-    animation_res: Res<PlayerAnimations>,
     mut texture_atlas_query: Query<&mut Handle<TextureAtlas>, With<Player>>,
-    velocity: Query<&Velocity, With<Player>>,
+    vel_q: Query<&Velocity, With<Player>>,
+    animation_res: Res<PlayerAnimations>,
 ) {
     // Cannot simply change jumping and falling animations when velocity is 0, since Bevy Rapier sometimes sets velocity to -0 for some reason.
     const VEL_LIMIT: f32 = 0.02;
 
-    let grounded = grounded_q.single();
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
-    let vel = velocity.single();
+    let vel = vel_q.single();
 
     let curr_animation_id =
         if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
@@ -201,5 +199,33 @@ fn flip_sprite(
     }
 }
 
-// Animate idle item on ground.
-fn animate_idle_item(mut item_q: Query<&mut Transform, With<Item>>, time: Res<Time>) {}
+// Animate idle item on floor.
+fn animate_idle_item(
+    mut item_q: Query<&mut Transform, With<Item>>, 
+    mut frame_time: Local<i32>,
+    mut switch: Local<i32>,
+    time: Res<Time>
+) {
+    let mut pos = item_q.single_mut();
+
+    const ANIM_LIMIT: i32 = 20; // Limit for top of animation.
+    const STEP: f32 = 0.2; // How much to increase position on each frame.
+
+    if *frame_time < ANIM_LIMIT && *switch == 0 {
+        *frame_time += 1;
+    } else if *frame_time >= ANIM_LIMIT && *switch == 0 {
+        *frame_time = 0;
+        *switch = 1;
+    } else if *frame_time >= -ANIM_LIMIT && *switch == 1 {
+        *frame_time -= 1;
+    } else {
+        *switch = 0;
+        *frame_time = 0;
+    }
+
+    if *switch == 0 { // Going up.
+        pos.translation.y += STEP;
+    } else if *switch == 1 { // Going down.
+        pos.translation.y -= STEP;
+    }
+}

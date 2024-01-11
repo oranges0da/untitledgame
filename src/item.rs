@@ -8,8 +8,7 @@ impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerItems>()
             .add_systems(Startup, spawn_idle_item)
-            .add_systems(Update, show_item_ui)
-            .add_systems(Update, animate_idle_item);
+            .add_systems(Update, show_item_ui);
     }
 }
 
@@ -139,35 +138,4 @@ fn spawn_idle_item(
     ))
     .insert(item.clone())
     .insert(Collider::cuboid(item.position.x / 2., item.position.y / 4.));
-}
-
-// Animate idle item on floor.
-fn animate_idle_item(
-    mut item_q: Query<&mut Transform, With<Item>>, 
-    mut frame_time: Local<i32>,
-    mut switch: Local<i32>,
-    time: Res<Time>
-) {
-    let mut pos = item_q.single_mut();
-
-    const ANIM_LIMIT: i32 = 20; // Limit for top of animation.
-    const STEP: f32 = 0.2; // How much to increase position on each frame.
-
-    if *frame_time < ANIM_LIMIT && *switch == 0 {
-        *frame_time += 1;
-    } else if *frame_time >= ANIM_LIMIT && *switch == 0 {
-        *frame_time = 0;
-        *switch = 1;
-    } else if *frame_time >= -ANIM_LIMIT && *switch == 1 {
-        *frame_time -= 1;
-    } else {
-        *switch = 0;
-        *frame_time = 0;
-    }
-
-    if *switch == 0 { // Going up.
-        pos.translation.y += STEP;
-    } else if *switch == 1 { // Going down.
-        pos.translation.y -= STEP;
-    }
 }
