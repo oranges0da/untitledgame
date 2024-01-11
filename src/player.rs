@@ -15,9 +15,9 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
-            .add_systems(Update, move_player)
+            .add_systems(Update, player_movement)
             .add_systems(Update, player_jump)
-            .add_systems(Update, ground_detection);
+            .add_systems(Update, player_ground_detection);
     }
 }
 
@@ -52,12 +52,12 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
         .insert(Collider::cuboid(12., 16.));
 }
 
-fn move_player(
-    mut player_query: Query<(&Player, &mut Transform)>,
+fn player_movement(
+    mut player_q: Query<(&Player, &mut Transform)>,
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    if let Ok((player, mut player_pos)) = player_query.get_single_mut() {
+    if let Ok((player, mut pos)) = player_q.get_single_mut() {
         let mut direction = Vec3::ZERO;
 
         if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
@@ -75,17 +75,17 @@ fn move_player(
         // Setting translation vector to product of updated direction vector
         // delta_seconds returns time elapsed since last frame, used to make movement frame-rate independent
         // as well as player.speed stems from globals
-        player_pos.translation += direction * player.speed * time.delta_seconds();
+        pos.translation += direction * player.speed * time.delta_seconds();
     } else {
         info!("Could not parse player_transform when moving player.");
     }
 }
 
 fn player_jump(
-    mut velocity: Query<&mut Velocity, With<Player>>,
+    mut vel_q: Query<&mut Velocity, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
-    let mut vel = velocity.single_mut();
+    let mut vel = vel_q.single_mut();
 
     if keyboard_input.any_pressed([KeyCode::Up, KeyCode::Space, KeyCode::W]) {
         vel.linvel.y = 100.;
@@ -98,6 +98,6 @@ fn player_jump(
 pub struct Grounded(pub bool);
 
 // Detect if player is grounded and set accordingly.
-fn ground_detection(mut player_q: Query<(&Transform, &mut Grounded), With<Player>>) {
+fn player_ground_detection(mut player_q: Query<(&Transform, &mut Grounded), With<Player>>) {
     // TODO: Implement native ground detection system.
 }
