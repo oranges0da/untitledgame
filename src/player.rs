@@ -16,8 +16,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
             .add_systems(Update, player_movement)
-            .add_systems(Update, player_jump)
-            .add_systems(Update, player_ground_detection);
+            .add_systems(Update, player_jump);
     }
 }
 
@@ -44,7 +43,6 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
                 frame_time: 0.6,
             },
         ))
-        .insert(Grounded(true))
         .insert(RigidBody::Dynamic)
         .insert(Velocity::default())
         .insert(AdditionalMassProperties::Mass(10.0)) // Set mass of player.
@@ -92,12 +90,4 @@ fn player_jump(
     } else {
         vel.linvel.y = vel.linvel.y.min(0.0);
     }
-}
-
-#[derive(Component)]
-pub struct Grounded(pub bool);
-
-// Detect if player is grounded and set accordingly.
-fn player_ground_detection(mut player_q: Query<(&Transform, &mut Grounded), With<Player>>) {
-    // TODO: Implement native ground detection system.
 }
