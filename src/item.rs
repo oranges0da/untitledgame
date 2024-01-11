@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
+use bevy_rapier2d::prelude::*;
 
 pub struct ItemPlugin;
 
@@ -122,6 +123,7 @@ fn spawn_idle_item(
     asset_server: Res<AssetServer>,
     item_res: Res<PlayerItems>,
 ) {
+    // Make arbitrary item object.
     let item = Item::new(
         Vec3::new(-20., -70., 1.),
         item_res.get("ice_cream".to_string()),
@@ -132,9 +134,10 @@ fn spawn_idle_item(
             texture: asset_server.load(&item.current_item.as_ref().unwrap().icon_path),
             transform: Transform::from_translation(item.position),
             ..default()
-        },
-        item,
-    ));
+        }
+    ))
+    .insert(item.clone())
+    .insert(Collider::cuboid(item.position.x / 2., item.position.y / 4.));
 }
 
 // Animate idle item on floor.
