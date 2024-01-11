@@ -85,9 +85,7 @@ fn player_jump(
     mut velocity: Query<&mut Velocity, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
-    let Ok(mut vel) = velocity.get_single_mut() else {
-        panic!("Could not parse player query in player_jump.");
-    };
+    let mut vel = velocity.single_mut();
 
     if keyboard_input.any_pressed([KeyCode::Up, KeyCode::Space, KeyCode::W]) {
         vel.linvel.y = 100.;
@@ -101,7 +99,5 @@ pub struct Grounded(pub bool);
 
 // Detect if player is grounded and set accordingly.
 fn ground_detection(mut player_q: Query<(&Transform, &mut Grounded), With<Player>>) {
-    for (pos, mut grounded) in &mut player_q {
-        info!("Position: {}", pos.translation.y);
-    }
+    // TODO: Implement native ground detection system.
 }

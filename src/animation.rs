@@ -147,8 +147,8 @@ fn change_player_animation(
                 KeyCode::S,
                 KeyCode::Down,
             ])
-            && vel.linvel.y < VEL_LIMIT
-            && vel.linvel.y > -VEL_LIMIT 
+            // Velocity is somewhere between -0.02 and 0.02, which is standing still on the y-axis in the eyes of Rapier.
+            && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
         {
             PlayerAnimationType::Run
         } else if vel.linvel.y > VEL_LIMIT && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
