@@ -85,9 +85,10 @@ impl FromWorld for PlayerItems {
     }
 }
 
-// Show current item in corner of screen with nice ui. (Only if player is holding an item of course.)
-fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, item: Query<&Item>) {
-    if let Ok(item) = item.get_single() {
+// Show current item in corner of screen with nice ui.
+fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, item_q: Query<&Item>) {
+    // Only show if item exists of course.
+    if let Ok(item) = item_q.get_single() {
         commands
             .spawn(NodeBundle {
                 style: Style {
@@ -150,7 +151,7 @@ fn animate_idle_item(
     let mut pos = item_q.single_mut();
 
     const ANIM_LIMIT: i32 = 20; // Limit for top of animation.
-    const STEP: f32 = 0.2; // How much animation differs on each frame.
+    const STEP: f32 = 0.2; // How much to increase position on each frame.
 
     if *frame_time < ANIM_LIMIT && *switch == 0 {
         *frame_time += 1;
@@ -164,9 +165,9 @@ fn animate_idle_item(
         *frame_time = 0;
     }
 
-    if *switch == 0 { // going up
+    if *switch == 0 { // Going up.
         pos.translation.y += STEP;
-    } else if *switch == 1 { // going down
+    } else if *switch == 1 { // Going down.
         pos.translation.y -= STEP;
     }
 }
