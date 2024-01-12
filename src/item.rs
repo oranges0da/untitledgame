@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use std::collections::HashMap;
 use bevy_rapier2d::prelude::*;
+use std::collections::HashMap;
+use crate::player::Player;
 
 pub struct ItemPlugin;
 
@@ -8,7 +9,8 @@ impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerItems>()
             .add_systems(Startup, spawn_idle_item)
-            .add_systems(Update, show_item_ui);
+            .add_systems(Update, show_item_ui)
+            .add_systems(Update, item_pickup);
     }
 }
 
@@ -92,36 +94,36 @@ fn show_item_ui(
     asset_server: Res<AssetServer>, 
     item_q: Query<&Item>,
 ) {
-    let item = item_q.single();
-   
-    // Only show item ui if player has item.
-    if item.in_inv {
-        commands
-            .spawn(NodeBundle {
-                style: Style {
-                    position_type: PositionType::Absolute,
-                    width: Val::Px(30.),
-                    height: Val::Px(30.),
-                    top: Val::Px(30.),
-                    right: Val::Px(30.),
-                    border: UiRect::all(Val::Px(5.)),
-                    padding: UiRect::all(Val::Px(30.)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
+    if let Ok(item) = item_q.get_single() {
+        // Only show item ui if player has item.
+        if item.in_inv {
+            commands
+                .spawn(NodeBundle {
+                    style: Style {
+                        position_type: PositionType::Absolute,
+                        width: Val::Px(30.),
+                        height: Val::Px(30.),
+                        top: Val::Px(30.),
+                        right: Val::Px(30.),
+                        border: UiRect::all(Val::Px(5.)),
+                        padding: UiRect::all(Val::Px(30.)),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::Center,
+                        ..default()
+                    },
+                    border_color: BorderColor(Color::WHITE),
                     ..default()
-                },
-                border_color: BorderColor(Color::WHITE),
-                ..default()
-            })
-            .with_children(|parent| {
-                parent.spawn(ImageBundle {
-                    image: asset_server
-                        .load(item.current_item.clone().unwrap().icon_path)
-                        .into(),
-                    transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
-                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn(ImageBundle {
+                        image: asset_server
+                            .load(item.current_item.clone().unwrap().icon_path)
+                            .into(),
+                        transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
+                        ..default()
+                    });
                 });
-            });
+        }
     }
 }
 
@@ -133,7 +135,7 @@ fn spawn_idle_item(
 ) {
     // Make arbitrary item object.
     let item = Item::new(
-        Vec3::new(-200., -70., 1.),
+        Vec3::new(-200., -50., 1.),
         item_res.get("ice_cream".to_string()),
         false
     );
@@ -146,5 +148,27 @@ fn spawn_idle_item(
         }
     ))
     .insert(item.clone())
+    .insert(Sensor)
+    .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
     .insert(Collider::cuboid(16., 16.)); // Item sprites are 32x32.
+}
+
+// Check if player has "picked up" (collided with) and item.
+fn item_pickup(
+    mut commands: Commands,
+    rapier_context: Res<RapierContext>, 
+    player_entity_q: Query<Entity, With<Player>>,
+    item_entity_q: Query<Entity, With<Item>>,
+    mut item_q: Query<&mut Item>
+) {
+    let player_entity= player_entity_q.single();
+
+    if let Ok(mut item) = item_q.get_single_mut() {
+        if let Ok(item_entity) = item_entity_q.get_single() {
+            if rapier_context.intersection_pair(player_entity, item_entity) == Some(true) {
+                item.in_inv = true;
+                commands.entity(item_entity).despawn();
+            }
+        }
+    }
 }

@@ -206,8 +206,6 @@ fn animate_idle_item(
     mut switch: Local<i32>,
     time: Res<Time>
 ) {
-    let mut pos = item_q.single_mut();
-
     const ANIM_LIMIT: i32 = 20; // Limit for top of animation.
     const STEP: f32 = 0.2; // How much to increase position on each frame.
 
@@ -223,9 +221,11 @@ fn animate_idle_item(
         *frame_time = 0;
     }
 
-    if *switch == 0 { // Going up.
-        pos.translation.y += STEP;
-    } else if *switch == 1 { // Going down.
-        pos.translation.y -= STEP;
+    if let Ok(mut pos) = item_q.get_single_mut() {
+        if *switch == 0 { // Going up.
+            pos.translation.y += STEP;
+        } else if *switch == 1 { // Going down.
+            pos.translation.y -= STEP;
+        }
     }
 }
