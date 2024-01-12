@@ -47,7 +47,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
         .insert(Velocity::default())
         .insert(AdditionalMassProperties::Mass(10.0)) // Set mass of player.
         .insert(GravityScale(2.0)) // Subject player body to gravity.
-        .insert(Collider::cuboid(12., 16.));
+        .insert(Collider::cuboid(10., 16.));
 }
 
 fn player_movement(

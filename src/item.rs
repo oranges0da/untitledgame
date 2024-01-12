@@ -87,10 +87,14 @@ impl FromWorld for PlayerItems {
 }
 
 // Show current item in corner of screen with nice ui.
-fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, item_q: Query<&Item>) {
-    // Only show if item exists of course.
+fn show_item_ui(
+    mut commands: Commands, 
+    asset_server: Res<AssetServer>, 
+    item_q: Query<&Item>,
+) {
     let item = item_q.single();
    
+    // Only show item ui if player has item.
     if item.in_inv {
         commands
             .spawn(NodeBundle {
@@ -131,7 +135,7 @@ fn spawn_idle_item(
     let item = Item::new(
         Vec3::new(-200., -70., 1.),
         item_res.get("ice_cream".to_string()),
-        false,
+        false
     );
 
     commands.spawn((
