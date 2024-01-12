@@ -16,13 +16,15 @@ impl Plugin for ItemPlugin {
 pub struct Item {
     pub position: Vec3,
     pub current_item: Option<PlayerItem>, // None if player has no items.
+    pub in_inv: bool, // Is player holding item?
 }
 
 impl Item {
-    pub fn new(position: Vec3, current_item: Option<PlayerItem>) -> Self {
+    pub fn new(position: Vec3, current_item: Option<PlayerItem>, in_inv: bool) -> Self {
         Item {
             position,
             current_item,
+            in_inv
         }
     }
 
@@ -87,7 +89,9 @@ impl FromWorld for PlayerItems {
 // Show current item in corner of screen with nice ui.
 fn show_item_ui(mut commands: Commands, asset_server: Res<AssetServer>, item_q: Query<&Item>) {
     // Only show if item exists of course.
-    if let Ok(item) = item_q.get_single() {
+    let item = item_q.single();
+   
+    if item.in_inv {
         commands
             .spawn(NodeBundle {
                 style: Style {
@@ -125,8 +129,9 @@ fn spawn_idle_item(
 ) {
     // Make arbitrary item object.
     let item = Item::new(
-        Vec3::new(-20., -70., 1.),
+        Vec3::new(-200., -70., 1.),
         item_res.get("ice_cream".to_string()),
+        false,
     );
 
     commands.spawn((
@@ -137,5 +142,5 @@ fn spawn_idle_item(
         }
     ))
     .insert(item.clone())
-    .insert(Collider::cuboid(item.position.x / 2., item.position.y / 4.));
+    .insert(Collider::cuboid(16., 16.)); // Item sprites are 32x32.
 }
