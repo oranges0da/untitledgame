@@ -116,6 +116,9 @@ fn show_item_ui(
     // If player picks up item, render item image in ui outline.
     if let Ok(item) = item_q.get_single() {
         if item.in_inv {
+            // Load font for text.
+            let font_handle = asset_server.load("font/SourceCodePro.ttf");
+
             // Item image.
             let item_img = commands.spawn(ImageBundle {
                 image: asset_server
@@ -123,6 +126,15 @@ fn show_item_ui(
                     .into(),
                 transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
                 ..default()
+            })
+            .with_children(|parent| {
+                parent.spawn(TextBundle::from_section(
+                    item.current_item.clone().unwrap().name.to_string(),
+                    TextStyle {
+                        font: font_handle,
+                        ..default()
+                    }
+                ));
             })
             .id();
 
