@@ -13,7 +13,8 @@ impl Plugin for AnimationPlugin {
             .add_systems(Update, animate_player)
             .add_systems(Update, change_player_animation)
             .add_systems(Update, flip_sprite)
-            .add_systems(Update, animate_idle_item);
+            .add_systems(Update, animate_item_idle)
+            .add_systems(Update, animate_item_in_inv);
     }
 }
 
@@ -200,7 +201,7 @@ fn flip_sprite(
 }
 
 // Animate idle item on floor.
-fn animate_idle_item(
+fn animate_item_idle(
     mut item_q: Query<&mut Transform, With<Item>>, 
     mut frame_time: Local<i32>,
     mut switch: Local<i32>,
@@ -227,5 +228,17 @@ fn animate_idle_item(
         } else if *switch == 1 { // Going down.
             pos.translation.y -= STEP;
         }
+    }
+}
+
+fn animate_item_in_inv(
+    player_q: Query<&Transform, With<Player>>,
+    mut item_q: Query<(&mut Transform, &Item), Without<Player>>,
+) {
+    let player_pos = player_q.single();
+    let (mut item_pos, item) = item_q.single_mut();
+
+    if item.in_inv {
+        item_pos.translation = player_pos.translation;
     }
 }

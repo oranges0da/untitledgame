@@ -139,7 +139,7 @@ fn spawn_idle_item(
 ) {
     // Make arbitrary item object.
     let item = Item::new(
-        Vec3::new(-200., -50., 1.),
+        Vec3::new(-200., -50., 0.9),
         item_res.get("ice_cream".to_string()),
         false
     );
