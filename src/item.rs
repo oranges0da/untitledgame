@@ -94,35 +94,39 @@ fn show_item_ui(
     asset_server: Res<AssetServer>, 
     item_q: Query<&Item>,
 ) {
+    // Spawn item box outline, does not depend on anything, simply the ui box.
+    let item_outline = commands.spawn(NodeBundle {
+        style: Style {
+            position_type: PositionType::Absolute,
+            width: Val::Px(30.),
+            height: Val::Px(30.),
+            top: Val::Px(30.),
+            right: Val::Px(30.),
+            border: UiRect::all(Val::Px(5.)),
+            padding: UiRect::all(Val::Px(30.)),
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },
+        border_color: BorderColor(Color::WHITE),
+        ..default()
+    })
+    .id();
+
+    // If player picks up item, render item image in ui outline.
     if let Ok(item) = item_q.get_single() {
-        // Only show item ui if player has item.
         if item.in_inv {
-            commands
-                .spawn(NodeBundle {
-                    style: Style {
-                        position_type: PositionType::Absolute,
-                        width: Val::Px(30.),
-                        height: Val::Px(30.),
-                        top: Val::Px(30.),
-                        right: Val::Px(30.),
-                        border: UiRect::all(Val::Px(5.)),
-                        padding: UiRect::all(Val::Px(30.)),
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        ..default()
-                    },
-                    border_color: BorderColor(Color::WHITE),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    parent.spawn(ImageBundle {
-                        image: asset_server
-                            .load(item.current_item.clone().unwrap().icon_path)
-                            .into(),
-                        transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
-                        ..default()
-                    });
-                });
+            // Item image.
+            let item_img = commands.spawn(ImageBundle {
+                image: asset_server
+                    .load(item.current_item.clone().unwrap().icon_path)
+                    .into(),
+                transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
+                ..default()
+            })
+            .id();
+
+            commands.entity(item_outline).add_child(item_img);
         }
     }
 }
@@ -167,7 +171,6 @@ fn item_pickup(
         if let Ok(item_entity) = item_entity_q.get_single() {
             if rapier_context.intersection_pair(player_entity, item_entity) == Some(true) {
                 item.in_inv = true;
-                commands.entity(item_entity).despawn();
             }
         }
     }
