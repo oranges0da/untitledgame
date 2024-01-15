@@ -112,6 +112,41 @@ fn show_item_ui(
         ..default()
     })
     .id();
+
+    // If player picks up item, render item image in ui outline.
+    if let Ok(item) = item_q.get_single() {
+        if item.in_inv {
+            // Font for text.
+            let font_handle = asset_server.load("font/SourceCodePro.ttf");
+
+            // Item image.
+            let item_img = commands.spawn(ImageBundle {
+                image: asset_server
+                    .load(item.current_item.clone().unwrap().icon_path)
+                    .into(),
+                transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
+                ..default()
+            })
+            .with_children(|parent| { // Spawn item name.
+                parent.spawn(TextBundle::from_section(
+                    item.current_item.clone().unwrap().name.to_string(),
+                    TextStyle {
+                        font: font_handle,
+                        ..default()
+                    })
+                    .with_style(Style {
+                        position_type: PositionType::Absolute,
+                        bottom: Val::Px(5.0),
+                        right: Val::Px(5.0),
+                        ..default()
+                    }
+                ));
+            })
+            .id();
+            
+            commands.entity(item_outline).add_child(item_img);
+        }
+    }
 }
 
 // Spawn idle item that player can pickup.
