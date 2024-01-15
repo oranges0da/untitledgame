@@ -168,7 +168,7 @@ fn change_player_animation(
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path);
     let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 32.), 5, 1, None, None);
+        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 5, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     // Set player's animation and spritesheet to relevant data.
