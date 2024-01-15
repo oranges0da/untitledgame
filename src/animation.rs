@@ -166,9 +166,15 @@ fn change_player_animation(
     let path = format!("{}.png", &new_animation.path);
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
-    let texture_handle = asset_server.load(path);
-    let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 5, 1, None, None);
+    let texture_handle = asset_server.load(path.clone());
+
+    // TODO: Make this less hacky and get rid of the cloning.
+    let texture_atlas = if path == "player/run.png" {
+        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 6, 1, None, None)
+    } else {
+        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 5, 1, None, None)
+    };
+    
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     // Set player's animation and spritesheet to relevant data.
