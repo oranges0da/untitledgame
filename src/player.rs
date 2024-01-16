@@ -7,6 +7,7 @@ pub struct Player {
     speed: f32,
     pub animation: PlayerAnimation,
     pub frame_time: f32, // To compare player's frame_time to animation's frame_time.
+    pub is_facing_right: bool,
 }
 
 #[derive(Component)]
@@ -42,6 +43,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
                 speed: 200.,
                 animation,
                 frame_time: 0.6,
+                is_facing_right: true, // Sprite is facing right.
             },
         ))
         .insert(RigidBody::Dynamic)
@@ -53,32 +55,30 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
 }
 
 fn player_movement(
-    mut player_q: Query<(&Player, &mut Transform)>,
+    mut player_q: Query<(&mut Player, &mut Transform)>,
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    if let Ok((player, mut pos)) = player_q.get_single_mut() {
-        let mut direction = Vec3::ZERO;
+    let (mut player, mut pos) = player_q.single_mut();
+    let mut direction = Vec3::ZERO;
 
-        if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
-            direction += Vec3::new(-100., 0., 0.);
-        }
-
-        if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
-            direction += Vec3::new(1., 0., 0.);
-        }
-
-        if direction.length() > 0. {
-            direction = direction.normalize(); // allows sprite to move diagonally
-        }
-
-        // Setting translation vector to product of updated direction vector
-        // delta_seconds returns time elapsed since last frame, used to make movement frame-rate independent
-        // as well as player.speed stems from globals
-        pos.translation += direction * player.speed * time.delta_seconds();
-    } else {
-        info!("Could not parse player_transform when moving player.");
+    if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
+        direction += Vec3::new(-100., 0., 0.);
+        player.is_facing_right = false;
     }
+
+    if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
+        direction += Vec3::new(1., 0., 0.);
+        player.is_facing_right = true;
+    }
+
+    if direction.length() > 0. {
+        direction = direction.normalize(); // allows sprite to move diagonally
+    }
+
+    // Setting translation vector to product of updated direction vector
+    // delta_seconds returns time elapsed since last frame, used to make movement frame-rate independent
+    pos.translation += direction * player.speed * time.delta_seconds();
 }
 
 fn player_jump(

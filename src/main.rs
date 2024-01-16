@@ -30,6 +30,7 @@ fn main() {
         )
         .insert_resource(ClearColor(Color::rgb(0., 0., 0.))) // Set background color to black. (outer space!)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(32.))
+        .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(camera::CameraPlugin)
         .add_plugins(debug::DebugPlugin)
         .add_plugins(player::PlayerPlugin)
