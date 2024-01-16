@@ -10,6 +10,12 @@ pub struct Player {
     pub is_facing_right: bool,
 }
 
+impl Player {
+    pub fn is_facing_right(&self) -> bool {
+        self.is_facing_right
+    }
+}
+
 #[derive(Component)]
 pub struct PlayerPlugin;
 
