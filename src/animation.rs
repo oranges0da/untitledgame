@@ -12,13 +12,13 @@ impl Plugin for AnimationPlugin {
         app.init_resource::<PlayerAnimations>()
             .add_systems(Update, animate_player)
             .add_systems(Update, change_player_animation)
-            .add_systems(Update, flip_sprite)
+            .add_systems(Update, flip_player)
             .add_systems(Update, animate_item_idle)
             .add_systems(Update, animate_item_in_inv);
     }
 }
 
-// Eq, PartialEq, and Hash necessary for enum to be inserted into HashMap.
+// Eq, PartialEq, and Hash necessary for animation to be inserted into HashMap world resource.
 #[derive(Component, Eq, PartialEq, Hash)]
 pub enum PlayerAnimationType {
     Idle,
@@ -109,7 +109,7 @@ fn animate_player(
             // Animate!
             sprite.index += frames_elapsed as usize;
 
-            // If sprite index becomes greater than length of total animation frames, reset sprite index. (To restart animation.)
+            // If sprite index becomes greater than length of total animation frames, reset sprite index. (Restart animation)
             if sprite.index >= player.animation.len {
                 sprite.index %= player.animation.len;
             }
@@ -167,14 +167,12 @@ fn change_player_animation(
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path.clone());
-
     // TODO: Make this less hacky and get rid of the cloning.
     let texture_atlas = if path == "player/run.png" {
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 6, 1, None, None)
     } else {
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 5, 1, None, None)
     };
-    
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     // Set player's animation and spritesheet to relevant data.
@@ -184,7 +182,7 @@ fn change_player_animation(
     }
 }
 
-fn flip_sprite(
+fn flip_player(
     mut player_sprite: Query<&mut TextureAtlasSprite, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
 ) {
@@ -240,11 +238,16 @@ fn animate_item_idle(
 fn animate_item_in_inv(
     player_q: Query<&Transform, With<Player>>,
     mut item_q: Query<(&mut Transform, &Item), Without<Player>>,
+    time: Res<Time>,
 ) {
-    let player_pos = player_q.single();
-    let (mut item_pos, item) = item_q.single_mut();
+    // let player_pos = player_q.single();
+    // let (mut item_pos, item) = item_q.single_mut();
 
-    if item.in_inv {
-        item_pos.translation = player_pos.translation;
-    }
+    // if item.in_inv {
+    //     // Render item in player's hands.
+    //     item_pos.translation.x = player_pos.translation.x + 15.;
+    //     item_pos.translation.y = player_pos.translation.y - 10.;
+
+    //     // TODO: Rotate item accordingly with direction player is facing.
+    // }
 }
