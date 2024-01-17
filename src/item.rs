@@ -84,6 +84,16 @@ impl FromWorld for PlayerItems {
             },
         );
 
+        items.add(
+            "soda".to_string(),
+            PlayerItem {
+                name: "Soda".to_string(),
+                item_type: ItemType::Food,
+                icon_path: "item/food/soda.png".to_string(),
+                index: 0,
+            },
+        );
+
         items
     }
 }
@@ -158,7 +168,7 @@ fn spawn_idle_item(
     // Make arbitrary item object.
     let item = Item::new(
         Vec3::new(-200., -50., 0.5),
-        item_res.get("ice_cream".to_string()),
+        item_res.get("soda".to_string()),
         false
     );
 
