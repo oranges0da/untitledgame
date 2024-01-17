@@ -18,7 +18,7 @@ impl Plugin for ItemPlugin {
 pub struct Item {
     pub position: Vec3,
     pub current_item: Option<PlayerItem>, // None if player has no items.
-    pub in_inv: bool, // Is player holding item?
+    pub in_inv: bool,
 }
 
 impl Item {
@@ -157,7 +157,7 @@ fn spawn_idle_item(
 ) {
     // Make arbitrary item object.
     let item = Item::new(
-        Vec3::new(-200., -50., 2.),
+        Vec3::new(-200., -50., 0.5),
         item_res.get("ice_cream".to_string()),
         false
     );
@@ -178,7 +178,6 @@ fn spawn_idle_item(
     .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
     .insert(Collider::cuboid(16., 16.)); // Item sprites are 32x32.
 }
-
 // Check if player has "picked up" (collided with) and item.
 fn item_pickup(
     mut commands: Commands,

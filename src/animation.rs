@@ -240,8 +240,8 @@ fn animate_item_in_inv(
     mut item_q: Query<(&mut Transform, &Item), Without<Player>>,
     time: Res<Time>,
 ) {
-    const X_OFFSET: f32 = 15.;
-    const Y_OFFSET: f32 = 10.;
+    const X_OFFSET: f32 = 25.;
+    const Y_OFFSET: f32 = 5.;
 
     let (player_pos, player) = player_q.single();
     let (mut item_transform, item) = item_q.single_mut();
