@@ -123,6 +123,7 @@ fn animate_player(
 // Change current player animation and spritesheet according to specified logic.
 fn change_player_animation(
     mut player_q: Query<&mut Player>,
+    item_q: Query<&Item>,
     keyboard_input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
@@ -134,6 +135,7 @@ fn change_player_animation(
     const VEL_LIMIT: f32 = 0.02;
 
     let mut player = player_q.single_mut();
+    let item = item_q.single();
     let mut atlas = texture_atlas_query.single_mut();
     let vel = vel_q.single();
 
@@ -163,12 +165,12 @@ fn change_player_animation(
         return ();
     };
 
-    let path = format!("{}.png", &new_animation.path);
+    let path = if item.in_inv { format!("{}_item.png", &new_animation.path) } else { format!("{}.png", &new_animation.path) };
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path.clone());
     // TODO: Make this less hacky and get rid of the cloning.
-    let texture_atlas = if path == "player/run.png" {
+    let texture_atlas = if path == "player/run.png" || path == "player/run_idle.png" {
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 6, 1, None, None)
     } else {
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 5, 1, None, None)
