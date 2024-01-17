@@ -157,7 +157,7 @@ fn spawn_idle_item(
 ) {
     // Make arbitrary item object.
     let item = Item::new(
-        Vec3::new(-200., -50., 0.9),
+        Vec3::new(-200., -50., 2.),
         item_res.get("ice_cream".to_string()),
         false
     );
@@ -165,7 +165,11 @@ fn spawn_idle_item(
     commands.spawn((
         SpriteBundle {
             texture: asset_server.load(&item.current_item.as_ref().unwrap().icon_path),
-            transform: Transform::from_translation(item.position),
+            transform: Transform {
+                translation: item.position,
+                scale: Vec3::new(1., 1., 0.),
+                ..default()
+            },
             ..default()
         }
     ))

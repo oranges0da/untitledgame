@@ -236,18 +236,28 @@ fn animate_item_idle(
 }
 
 fn animate_item_in_inv(
-    player_q: Query<&Transform, With<Player>>,
+    player_q: Query<(&Transform, &Player)>,
     mut item_q: Query<(&mut Transform, &Item), Without<Player>>,
     time: Res<Time>,
 ) {
-    // let player_pos = player_q.single();
-    // let (mut item_pos, item) = item_q.single_mut();
+    const X_OFFSET: f32 = 15.;
+    const Y_OFFSET: f32 = 10.;
 
-    // if item.in_inv {
-    //     // Render item in player's hands.
-    //     item_pos.translation.x = player_pos.translation.x + 15.;
-    //     item_pos.translation.y = player_pos.translation.y - 10.;
+    let (player_pos, player) = player_q.single();
+    let (mut item_transform, item) = item_q.single_mut();
 
-    //     // TODO: Rotate item accordingly with direction player is facing.
-    // }
+    if item.in_inv {
+        // Offset to render item in player's hands.
+        item_transform.translation.y = player_pos.translation.y - Y_OFFSET;
+
+        if player.is_facing_right() {
+            item_transform.translation.x = player_pos.translation.x + X_OFFSET;
+            // Rotate item 45 degrees to the right.
+            item_transform.rotation = Quat::from_rotation_z(-std::f32::consts::FRAC_PI_4);
+        } else {
+            item_transform.translation.x = player_pos.translation.x - X_OFFSET;
+            // Rotate item 45 degrees to the right.
+            item_transform.rotation = Quat::from_rotation_z(std::f32::consts::FRAC_PI_4);
+        }
+    }
 }
