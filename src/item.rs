@@ -17,12 +17,12 @@ impl Plugin for ItemPlugin {
 #[derive(Component, Clone)]
 pub struct Item {
     pub position: Vec3,
-    pub current_item: Option<PlayerItem>, // None if player has no items.
+    pub current_item: PlayerItem,
     pub in_inv: bool,
 }
 
 impl Item {
-    pub fn new(position: Vec3, current_item: Option<PlayerItem>, in_inv: bool) -> Self {
+    pub fn new(position: Vec3, current_item: PlayerItem, in_inv: bool) -> Self {
         Item {
             position,
             current_item,
@@ -30,12 +30,8 @@ impl Item {
         }
     }
 
-    pub fn is_holding_item(&self) -> bool {
-        self.current_item.is_some()
-    }
-
-    pub fn get_current_item(&self) -> Option<&PlayerItem> {
-        self.current_item.as_ref()
+    pub fn get_current_item(&self) -> PlayerItem {
+        self.current_item.clone()
     }
 }
 
@@ -132,14 +128,14 @@ fn show_item_ui(
             // Item image.
             let item_img = commands.spawn(ImageBundle {
                 image: asset_server
-                    .load(item.current_item.clone().unwrap().icon_path)
+                    .load(&item.get_current_item().icon_path.to_string())
                     .into(),
                 transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
                 ..default()
             })
             .with_children(|parent| { // Spawn item name.
                 parent.spawn(TextBundle::from_section(
-                    item.current_item.clone().unwrap().name.to_string(),
+                    item.get_current_item().name.to_string(),
                     TextStyle {
                         font: font_handle,
                         ..default()
@@ -168,13 +164,13 @@ fn spawn_idle_item(
     // Make arbitrary item object.
     let item = Item::new(
         Vec3::new(-200., -50., 0.5),
-        item_res.get("soda".to_string()),
+        item_res.get("soda".to_string()).unwrap(),
         false
     );
 
     commands.spawn((
         SpriteBundle {
-            texture: asset_server.load(&item.current_item.as_ref().unwrap().icon_path),
+            texture: asset_server.load(item.get_current_item().icon_path),
             transform: Transform {
                 translation: item.position,
                 scale: Vec3::new(1., 1., 0.),
