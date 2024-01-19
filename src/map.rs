@@ -14,8 +14,6 @@ impl Plugin for MapPlugin {
 fn spawn_bg(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // Spawn earth in background as it would appear on the moon.
     commands.spawn(SpriteBundle {

@@ -7,7 +7,7 @@ pub struct ItemPlugin;
 
 impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<PlayerItems>()
+        app.init_resource::<Items>()
             .add_systems(Startup, spawn_idle_item)
             .add_systems(Update, show_item_ui)
             .add_systems(Update, item_pickup);
@@ -17,76 +17,75 @@ impl Plugin for ItemPlugin {
 #[derive(Component, Clone)]
 pub struct Item {
     pub position: Vec3,
-    pub current_item: PlayerItem,
+    pub name: String,
+    pub icon_path: String,
+    pub index: i32,
     pub in_inv: bool,
 }
 
 impl Item {
-    pub fn new(position: Vec3, current_item: PlayerItem, in_inv: bool) -> Self {
+    pub fn new(
+        position: Vec3,
+        name: String,
+        icon_path: String,
+        index: i32,
+        in_inv: bool,
+    ) -> Self {
         Item {
             position,
-            current_item,
-            in_inv
+            name,
+            icon_path,
+            index,
+            in_inv,
         }
     }
 
-    pub fn get_current_item(&self) -> PlayerItem {
-        self.current_item.clone()
+    pub fn get_with_name(&self) -> Self {
+        self.clone()
     }
-}
-
-#[derive(Clone, Debug)]
-enum ItemType {
-    Food,
-}
-
-#[derive(Component, Clone)]
-pub struct PlayerItem {
-    name: String,
-    item_type: ItemType,
-    icon_path: String,
-    index: i32,
 }
 
 #[derive(Resource)]
-pub struct PlayerItems {
-    items: HashMap<String, PlayerItem>,
+pub struct Items {
+    items: HashMap<String, Item>,
 }
 
-impl PlayerItems {
-    pub fn add(&mut self, id: String, item: PlayerItem) {
+impl Items {
+    pub fn add(&mut self, id: String, item: Item) {
         self.items.insert(id, item);
     }
 
-    pub fn get(&self, id: String) -> Option<PlayerItem> {
+    pub fn get(&self, id: String) -> Option<Item> {
         return self.items.get(&id).cloned();
     }
 }
 
 // init items for global resource
-impl FromWorld for PlayerItems {
+impl FromWorld for Items {
     fn from_world(_world: &mut World) -> Self {
-        let mut items = PlayerItems {
+        let mut items = Items {
             items: HashMap::new(),
         };
 
         items.add(
             "ice_cream".to_string(),
-            PlayerItem {
+            Item {
+                position: Vec3::ZERO,
                 name: "Ice Cream".to_string(),
-                item_type: ItemType::Food,
                 icon_path: "item/food/ice_cream.png".to_string(),
                 index: 0,
+                in_inv: false,
             },
         );
 
         items.add(
             "soda".to_string(),
-            PlayerItem {
+            Item {
+                position: Vec3::ZERO,
                 name: "Soda".to_string(),
-                item_type: ItemType::Food,
                 icon_path: "item/food/soda.png".to_string(),
                 index: 0,
+                in_inv: false,
             },
         );
 
@@ -128,14 +127,14 @@ fn show_item_ui(
             // Item image.
             let item_img = commands.spawn(ImageBundle {
                 image: asset_server
-                    .load(&item.get_current_item().icon_path.to_string())
+                    .load(item.icon_path.to_string())
                     .into(),
                 transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
                 ..default()
             })
             .with_children(|parent| { // Spawn item name.
                 parent.spawn(TextBundle::from_section(
-                    item.get_current_item().name.to_string(),
+                    item.name.to_string(),
                     TextStyle {
                         font: font_handle,
                         ..default()
@@ -159,26 +158,21 @@ fn show_item_ui(
 fn spawn_idle_item(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    item_res: Res<PlayerItems>,
+    item_res: Res<Items>,
 ) {
-    // Make arbitrary item object.
-    let item = Item::new(
-        Vec3::new(-200., -50., 0.5),
-        item_res.get("soda".to_string()).unwrap(),
-        false
-    );
+    let Some(item) = item_res.get("soda".to_string()) else { return; };
 
-    commands.spawn((
+    commands.spawn(
         SpriteBundle {
-            texture: asset_server.load(item.get_current_item().icon_path),
+            texture: asset_server.load(item.icon_path.to_string()),
             transform: Transform {
-                translation: item.position,
+                translation: Vec3::new(-200., -50., 0.5),
                 scale: Vec3::new(1., 1., 0.),
                 ..default()
             },
             ..default()
         }
-    ))
+    )
     .insert(item.clone())
     .insert(Sensor)
     .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
@@ -186,11 +180,10 @@ fn spawn_idle_item(
 }
 // Check if player has "picked up" (collided with) and item.
 fn item_pickup(
-    mut commands: Commands,
-    rapier_context: Res<RapierContext>, 
     player_entity_q: Query<Entity, With<Player>>,
     item_entity_q: Query<Entity, With<Item>>,
-    mut item_q: Query<&mut Item>
+    mut item_q: Query<&mut Item>,
+    rapier_context: Res<RapierContext>,
 ) {
     let player_entity= player_entity_q.single();
 

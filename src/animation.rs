@@ -211,7 +211,6 @@ fn animate_item_idle(
     mut item_q: Query<&mut Transform, With<Item>>, 
     mut frame_time: Local<i32>,
     mut switch: Local<i32>,
-    time: Res<Time>
 ) {
     const ANIM_LIMIT: i32 = 20; // Limit for top of animation.
     const STEP: f32 = 0.2; // How much to increase position on each frame.
@@ -240,7 +239,6 @@ fn animate_item_idle(
 fn animate_item_in_inv(
     player_q: Query<(&Transform, &Player)>,
     mut item_q: Query<(&mut Transform, &Item), Without<Player>>,
-    time: Res<Time>,
 ) {
     const X_OFFSET: f32 = 25.;
     const Y_OFFSET: f32 = 5.;
