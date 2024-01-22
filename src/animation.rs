@@ -135,7 +135,6 @@ fn change_player_animation(
     const VEL_LIMIT: f32 = 0.02;
 
     let mut player = player_q.single_mut();
-    let item = item_q.single();
     let mut atlas = texture_atlas_query.single_mut();
     let vel = vel_q.single();
 
@@ -158,14 +157,26 @@ fn change_player_animation(
             PlayerAnimationType::Fall
         } else {
             PlayerAnimationType::Idle
-        };
+    };
 
-    // Get animation object from global animation resource created in FromWorld.
+    // 
     let Some(new_animation) = animation_res.get(curr_animation_id) else {
         return ();
     };
 
-    let path = if item.in_inv { format!("{}_item.png", &new_animation.path) } else { format!("{}.png", &new_animation.path) };
+    let mut path: String = new_animation.path.clone();
+
+    for item in item_q.iter() {
+        if item.in_inv {
+            if new_animation.path != "player/fall" && new_animation.path != "player/jump" {
+                path.push_str("_item.png");
+                break;
+            }
+        } else {
+            path.push_str(".png");
+            break;
+        }
+    }
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path.clone());
@@ -227,11 +238,11 @@ fn animate_item_idle(
         *frame_time = 0;
     }
 
-    if let Ok(mut pos) = item_q.get_single_mut() {
-        if *switch == 0 { // Going up.
-            pos.translation.y += STEP;
-        } else if *switch == 1 { // Going down.
-            pos.translation.y -= STEP;
+    for mut pos in &mut item_q.iter_mut() {
+        if *switch == 0 {
+            pos.translation.y += STEP; // Going up.
+        } else if *switch == 1 {
+            pos.translation.y -= STEP; // Going down.
         }
     }
 }
@@ -240,24 +251,21 @@ fn animate_item_in_inv(
     player_q: Query<(&Transform, &Player)>,
     mut item_q: Query<(&mut Transform, &Item), Without<Player>>,
 ) {
-    const X_OFFSET: f32 = 25.;
+    const X_OFFSET: f32 = 20.;
     const Y_OFFSET: f32 = 5.;
 
     let (player_pos, player) = player_q.single();
-    let (mut item_transform, item) = item_q.single_mut();
 
-    if item.in_inv {
-        // Offset to render item in player's hands.
-        item_transform.translation.y = player_pos.translation.y - Y_OFFSET;
+    for (mut item_pos, item) in item_q.iter_mut() {
+        if item.in_inv {
+            // Offset to render item in player's hands.
+            item_pos.translation.y = player_pos.translation.y - Y_OFFSET;
 
-        if player.is_facing_right() {
-            item_transform.translation.x = player_pos.translation.x + X_OFFSET;
-            // Rotate item 45 degrees to the right.
-            item_transform.rotation = Quat::from_rotation_z(-std::f32::consts::FRAC_PI_4);
-        } else {
-            item_transform.translation.x = player_pos.translation.x - X_OFFSET;
-            // Rotate item 45 degrees to the right.
-            item_transform.rotation = Quat::from_rotation_z(std::f32::consts::FRAC_PI_4);
+            if player.is_facing_right() {
+                item_pos.translation.x = player_pos.translation.x + X_OFFSET;
+            } else {
+                item_pos.translation.x = player_pos.translation.x - X_OFFSET;
+            }
         }
     }
 }

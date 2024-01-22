@@ -14,9 +14,8 @@ impl Plugin for ItemPlugin {
     }
 }
 
-#[derive(Component, Clone)]
+#[derive(Component, Clone, Debug)]
 pub struct Item {
-    pub position: Vec3,
     pub name: String,
     pub icon_path: String,
     pub index: i32,
@@ -25,14 +24,12 @@ pub struct Item {
 
 impl Item {
     pub fn new(
-        position: Vec3,
         name: String,
         icon_path: String,
         index: i32,
         in_inv: bool,
     ) -> Self {
         Item {
-            position,
             name,
             icon_path,
             index,
@@ -40,8 +37,13 @@ impl Item {
         }
     }
 
-    pub fn get_with_name(&self) -> Self {
-        self.clone()
+    pub fn empty() -> Self {
+        Item {
+            name: "".to_string(),
+            icon_path: "".to_string(),
+            index: 0,
+            in_inv: false,
+        }
     }
 }
 
@@ -70,7 +72,6 @@ impl FromWorld for Items {
         items.add(
             "ice_cream".to_string(),
             Item {
-                position: Vec3::ZERO,
                 name: "Ice Cream".to_string(),
                 icon_path: "item/food/ice_cream.png".to_string(),
                 index: 0,
@@ -81,7 +82,6 @@ impl FromWorld for Items {
         items.add(
             "soda".to_string(),
             Item {
-                position: Vec3::ZERO,
                 name: "Soda".to_string(),
                 icon_path: "item/food/soda.png".to_string(),
                 index: 0,
@@ -160,26 +160,50 @@ fn spawn_idle_item(
     asset_server: Res<AssetServer>,
     item_res: Res<Items>,
 ) {
-    let Some(item) = item_res.get("soda".to_string()) else { return; };
+    let Some(soda_item) = item_res.get("soda".to_string()) else { return; };
+    let Some(ice_cream_item) = item_res.get("ice_cream".to_string()) else { return; };
 
-    commands.spawn(
+    let ice_cream_entity = commands.spawn(
         SpriteBundle {
-            texture: asset_server.load(item.icon_path.to_string()),
+            texture: asset_server.load(ice_cream_item.icon_path.to_string()),
             transform: Transform {
-                translation: Vec3::new(-200., -50., 0.5),
+                translation: Vec3::new(200., -50., 1.1),
                 scale: Vec3::new(1., 1., 0.),
                 ..default()
             },
             ..default()
         }
     )
-    .insert(item.clone())
+    .insert(ice_cream_item.clone())
+    .insert(Sensor)
+    .insert(ActiveEvents::COLLISION_EVENTS)
+    .insert(Collider::cuboid(16., 16.))
+    .id();
+
+    let soda_entity = commands.spawn(
+        SpriteBundle {
+            texture: asset_server.load(soda_item.icon_path.to_string()),
+            transform: Transform {
+                translation: Vec3::new(-200., -50., 1.1),
+                scale: Vec3::new(1., 1., 0.),
+                ..default()
+            },
+            ..default()
+        }
+    )
+    .insert(soda_item.clone())
     .insert(Sensor)
     .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
-    .insert(Collider::cuboid(16., 16.)); // Item sprites are 32x32.
+    .insert(Collider::cuboid(16., 16.)) // Item sprites are 32x32.
+    .id();
+
+    info!("Ice cream id: {:?}", ice_cream_entity);
+    info!("Soda id: {:?}", soda_entity);
 }
-// Check if player has "picked up" (collided with) and item.
+
+// Check if player has "picked up" (collided with) an item.
 fn item_pickup(
+    mut commands: Commands,
     player_entity_q: Query<Entity, With<Player>>,
     item_entity_q: Query<Entity, With<Item>>,
     mut item_q: Query<&mut Item>,
@@ -187,9 +211,10 @@ fn item_pickup(
 ) {
     let player_entity= player_entity_q.single();
 
-    if let Ok(mut item) = item_q.get_single_mut() {
-        if let Ok(item_entity) = item_entity_q.get_single() {
-            if rapier_context.intersection_pair(player_entity, item_entity) == Some(true) {
+    for item_entity in item_entity_q.iter() {
+        if rapier_context.intersection_pair(player_entity, item_entity) == Some(true) {
+            // Get associated item component from intersected entity.
+            if let Ok(mut item) = item_q.get_component_mut::<Item>(item_entity) {
                 item.in_inv = true;
             }
         }
