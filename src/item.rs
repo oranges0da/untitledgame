@@ -10,7 +10,8 @@ impl Plugin for ItemPlugin {
         app.init_resource::<Items>()
             .add_systems(Startup, spawn_idle_item)
             .add_systems(Update, show_item_ui)
-            .add_systems(Update, item_pickup);
+            .add_systems(Update, item_pickup)
+            .add_systems(Update, drop_item);
     }
 }
 
@@ -203,20 +204,36 @@ fn spawn_idle_item(
 
 // Check if player has "picked up" (collided with) an item.
 fn item_pickup(
-    mut commands: Commands,
     player_entity_q: Query<Entity, With<Player>>,
     item_entity_q: Query<Entity, With<Item>>,
     mut item_q: Query<&mut Item>,
     rapier_context: Res<RapierContext>,
+    keyboard_input: Res<Input<KeyCode>>,
 ) {
     let player_entity= player_entity_q.single();
 
     for item_entity in item_entity_q.iter() {
-        if rapier_context.intersection_pair(player_entity, item_entity) == Some(true) {
+        if rapier_context.intersection_pair(player_entity, item_entity) == Some(true)
+            && keyboard_input.just_pressed(KeyCode::E)
+        {
             // Get associated item component from intersected entity.
             if let Ok(mut item) = item_q.get_component_mut::<Item>(item_entity) {
                 item.in_inv = true;
             }
+        }
+    }
+}
+
+fn drop_item(
+    player_q: Query<&Transform, With<Player>>,
+    mut item_q: Query<&mut Item>,
+    keyboard_input: Res<Input<KeyCode>>
+) {
+    let pos = player_q.single();
+
+    for mut item in &mut item_q.iter_mut() {
+        if item.in_inv && keyboard_input.just_pressed(KeyCode::Q) {
+            item.in_inv = false;
         }
     }
 }
