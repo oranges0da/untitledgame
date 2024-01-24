@@ -87,7 +87,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 1,
                 frame_time: 0.1,
-                path: "player/fall".to_string(),
+                path: "player/fall.png".to_string(),
             },
         );
 
@@ -123,7 +123,7 @@ fn animate_player(
 // Change current player animation and spritesheet according to specified logic.
 fn change_player_animation(
     mut player_q: Query<&mut Player>,
-    item_q: Query<&Item>,
+    item_q: Query<&mut Item>,
     keyboard_input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
@@ -133,6 +133,17 @@ fn change_player_animation(
 ) {
     // Cannot simply change jumping and falling animations when velocity is 0, since Bevy Rapier sometimes sets velocity to -0 for some reason.
     const VEL_LIMIT: f32 = 0.02;
+
+    // Needed for setting correct spritesheet for player.
+    let mut has_item: bool = false;
+    for item in item_q.iter() {
+        if item.in_inv {
+            has_item = true;
+            break;
+        } else {
+            has_item = false;
+        }
+    }
 
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
@@ -148,7 +159,7 @@ fn change_player_animation(
                 KeyCode::Down,
             ])
             // Velocity is somewhere between -0.02 and 0.02, which is standing still on the y-axis in the eyes of Rapier.
-            && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
+            // && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
         {
             PlayerAnimationType::Run
         } else if vel.linvel.y > VEL_LIMIT && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
@@ -159,24 +170,9 @@ fn change_player_animation(
             PlayerAnimationType::Idle
     };
 
-    // 
-    let Some(new_animation) = animation_res.get(curr_animation_id) else {
-        return ();
-    };
-
-    let mut path: String = new_animation.path.clone();
-
-    for item in item_q.iter() {
-        if item.in_inv {
-            if new_animation.path != "player/fall" && new_animation.path != "player/jump" {
-                path.push_str("_item.png");
-                break;
-            }
-        } else {
-            path.push_str(".png");
-            break;
-        }
-    }
+    // Get relevant animation and set path accordingly.
+    let Some(new_animation) = animation_res.get(curr_animation_id) else { return; };
+    let path = if has_item { format!("{}_item.png", new_animation.path) } else { format!("{}.png", new_animation.path) };
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path.clone());

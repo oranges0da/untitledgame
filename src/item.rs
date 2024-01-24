@@ -19,7 +19,6 @@ impl Plugin for ItemPlugin {
 pub struct Item {
     pub name: String,
     pub icon_path: String,
-    pub index: i32,
     pub in_inv: bool,
 }
 
@@ -27,13 +26,11 @@ impl Item {
     pub fn new(
         name: String,
         icon_path: String,
-        index: i32,
         in_inv: bool,
     ) -> Self {
         Item {
             name,
             icon_path,
-            index,
             in_inv,
         }
     }
@@ -42,7 +39,6 @@ impl Item {
         Item {
             name: "".to_string(),
             icon_path: "".to_string(),
-            index: 0,
             in_inv: false,
         }
     }
@@ -75,7 +71,6 @@ impl FromWorld for Items {
             Item {
                 name: "Ice Cream".to_string(),
                 icon_path: "item/food/ice_cream.png".to_string(),
-                index: 0,
                 in_inv: false,
             },
         );
@@ -85,7 +80,6 @@ impl FromWorld for Items {
             Item {
                 name: "Soda".to_string(),
                 icon_path: "item/food/soda.png".to_string(),
-                index: 0,
                 in_inv: false,
             },
         );
@@ -161,10 +155,10 @@ fn spawn_idle_item(
     asset_server: Res<AssetServer>,
     item_res: Res<Items>,
 ) {
-    let Some(soda_item) = item_res.get("soda".to_string()) else { return; };
     let Some(ice_cream_item) = item_res.get("ice_cream".to_string()) else { return; };
+    let Some(soda_item) = item_res.get("soda".to_string()) else { return; };
 
-    let ice_cream_entity = commands.spawn(
+    commands.spawn(
         SpriteBundle {
             texture: asset_server.load(ice_cream_item.icon_path.to_string()),
             transform: Transform {
@@ -178,10 +172,9 @@ fn spawn_idle_item(
     .insert(ice_cream_item.clone())
     .insert(Sensor)
     .insert(ActiveEvents::COLLISION_EVENTS)
-    .insert(Collider::cuboid(16., 16.))
-    .id();
+    .insert(Collider::cuboid(16., 16.));
 
-    let soda_entity = commands.spawn(
+    commands.spawn(
         SpriteBundle {
             texture: asset_server.load(soda_item.icon_path.to_string()),
             transform: Transform {
@@ -194,12 +187,8 @@ fn spawn_idle_item(
     )
     .insert(soda_item.clone())
     .insert(Sensor)
-    .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
-    .insert(Collider::cuboid(16., 16.)) // Item sprites are 32x32.
-    .id();
-
-    info!("Ice cream id: {:?}", ice_cream_entity);
-    info!("Soda id: {:?}", soda_entity);
+    .insert(ActiveEvents::COLLISION_EVENTS)
+    .insert(Collider::cuboid(16., 16.));
 }
 
 // Check if player has "picked up" (collided with) an item.
@@ -216,7 +205,7 @@ fn item_pickup(
         if rapier_context.intersection_pair(player_entity, item_entity) == Some(true)
             && keyboard_input.just_pressed(KeyCode::E)
         {
-            // Get associated item component from intersected entity.
+            // Get associated component from intersected item entity.
             if let Ok(mut item) = item_q.get_component_mut::<Item>(item_entity) {
                 item.in_inv = true;
             }
