@@ -87,7 +87,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 1,
                 frame_time: 0.1,
-                path: "player/fall.png".to_string(),
+                path: "player/fall".to_string(),
             },
         );
 
@@ -176,7 +176,6 @@ fn change_player_animation(
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path.clone());
-    // TODO: Make this less hacky and get rid of the cloning.
     let texture_atlas = if path == "player/run.png" || path == "player/run_idle.png" {
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 6, 1, None, None)
     } else {
