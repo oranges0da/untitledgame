@@ -104,8 +104,6 @@ fn show_item_ui(
             right: Val::Px(30.),
             border: UiRect::all(Val::Px(5.)),
             padding: UiRect::all(Val::Px(30.)),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
             ..default()
         },
         border_color: BorderColor(Color::WHITE),
@@ -114,7 +112,7 @@ fn show_item_ui(
     .id();
 
     // If player picks up item, render item image in ui outline.
-    if let Ok(item) = item_q.get_single() {
+    for item in item_q.iter() {
         if item.in_inv {
             // Font for text.
             let font_handle = asset_server.load("font/SourceCodePro.ttf");
@@ -138,6 +136,7 @@ fn show_item_ui(
                         position_type: PositionType::Absolute,
                         bottom: Val::Px(5.0),
                         right: Val::Px(5.0),
+                        justify_content: JustifyContent::Center,
                         ..default()
                     }
                 ));
@@ -145,6 +144,8 @@ fn show_item_ui(
             .id();
             
             commands.entity(item_outline).add_child(item_img);
+        } else {
+            commands.entity(item_outline).clear_children();
         }
     }
 }

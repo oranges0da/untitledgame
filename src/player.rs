@@ -4,7 +4,6 @@ use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
-    speed: f32,
     pub animation: PlayerAnimation,
     pub frame_time: f32, // To compare player's frame_time to animation's frame_time.
     pub is_facing_right: bool,
@@ -46,7 +45,6 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
                 ..default()
             },
             Player {
-                speed: 200.,
                 animation,
                 frame_time: 0.6,
                 is_facing_right: true, // Sprite is facing right.
@@ -67,6 +65,7 @@ fn player_movement(
 ) {
     let (mut player, mut pos) = player_q.single_mut();
     let mut direction = Vec3::ZERO;
+    const SPEED: f32 = 250.;
 
     if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
         direction += Vec3::new(-100., 0., 0.);
@@ -84,7 +83,7 @@ fn player_movement(
 
     // Setting translation vector to product of updated direction vector
     // delta_seconds returns time elapsed since last frame, used to make movement frame-rate independent
-    pos.translation += direction * player.speed * time.delta_seconds();
+    pos.translation += direction * SPEED * time.delta_seconds();
 }
 
 fn player_jump(
@@ -94,7 +93,7 @@ fn player_jump(
     let mut vel = vel_q.single_mut();
 
     if keyboard_input.any_pressed([KeyCode::Up, KeyCode::Space, KeyCode::W]) {
-        vel.linvel.y = 100.;
+        vel.linvel.y = 200.;
     } else {
         vel.linvel.y = vel.linvel.y.min(0.0);
     }
