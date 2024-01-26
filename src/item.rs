@@ -9,9 +9,10 @@ impl Plugin for ItemPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Items>()
             .add_systems(Startup, spawn_idle_item)
-            .add_systems(Update, show_item_ui)
+            .add_systems(Startup, spawn_item_ui)
             .add_systems(Update, item_pickup)
-            .add_systems(Update, drop_item);
+            .add_systems(Update, drop_item)
+            .add_systems(Update, update_item_ui);
     }
 }
 
@@ -85,68 +86,6 @@ impl FromWorld for Items {
         );
 
         items
-    }
-}
-
-// Show current item in corner of screen with nice ui.
-fn show_item_ui(
-    mut commands: Commands, 
-    asset_server: Res<AssetServer>, 
-    item_q: Query<&Item>,
-) {
-    // Spawn item box outline, does not depend on anything, simply the ui box.
-    let item_outline = commands.spawn(NodeBundle {
-        style: Style {
-            position_type: PositionType::Absolute,
-            width: Val::Px(30.),
-            height: Val::Px(30.),
-            top: Val::Px(30.),
-            right: Val::Px(30.),
-            border: UiRect::all(Val::Px(5.)),
-            padding: UiRect::all(Val::Px(30.)),
-            ..default()
-        },
-        border_color: BorderColor(Color::WHITE),
-        ..default()
-    })
-    .id();
-
-    // If player picks up item, render item image in ui outline.
-    for item in item_q.iter() {
-        if item.in_inv {
-            // Font for text.
-            let font_handle = asset_server.load("font/SourceCodePro.ttf");
-
-            // Item image.
-            let item_img = commands.spawn(ImageBundle {
-                image: asset_server
-                    .load(item.icon_path.to_string())
-                    .into(),
-                transform: Transform::from_scale(Vec3::new(2., 2., 0.)),
-                ..default()
-            })
-            .with_children(|parent| { // Spawn item name.
-                parent.spawn(TextBundle::from_section(
-                    item.name.to_string(),
-                    TextStyle {
-                        font: font_handle,
-                        ..default()
-                    })
-                    .with_style(Style {
-                        position_type: PositionType::Absolute,
-                        bottom: Val::Px(5.0),
-                        right: Val::Px(5.0),
-                        justify_content: JustifyContent::Center,
-                        ..default()
-                    }
-                ));
-            })
-            .id();
-            
-            commands.entity(item_outline).add_child(item_img);
-        } else {
-            commands.entity(item_outline).clear_children();
-        }
     }
 }
 
@@ -224,6 +163,80 @@ fn drop_item(
     for mut item in &mut item_q.iter_mut() {
         if item.in_inv && keyboard_input.just_pressed(KeyCode::Q) {
             item.in_inv = false;
+        }
+    }
+}
+
+#[derive(Component)]
+struct ItemUI;
+
+fn spawn_item_ui(
+    mut commands: Commands, 
+) {
+    // Spawn item box outline.
+    commands.spawn(NodeBundle {
+        style: Style {
+            position_type: PositionType::Absolute,
+            width: Val::Px(30.),
+            height: Val::Px(30.),
+            top: Val::Px(30.),
+            right: Val::Px(30.),
+            border: UiRect::all(Val::Px(5.)),
+            padding: UiRect::all(Val::Px(30.)),
+            ..default()
+        },
+        border_color: BorderColor(Color::WHITE),
+        ..default()
+    });
+}
+
+// Spawn and despawn current item in ui.
+fn update_item_ui(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    item_q: Query<&Item>,
+    item_ui_q: Query<Entity, With<ItemUI>>,
+) {
+    for item in item_q.iter() {
+        if item.in_inv {
+            // Item image.
+            commands.spawn(ImageBundle {
+                image: asset_server.load(item.icon_path.to_string()).into(),
+                transform: Transform {
+                    scale: Vec3::new(2.5, 2.5, 0.),
+                    ..default()
+                },
+                style: Style {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(50.),
+                    right: Val::Px(50.),
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(ItemUI);
+
+            let font_handle = asset_server.load("font/SourceCodePro.ttf");
+            // Item name.
+            commands.spawn(TextBundle::from_section(
+                item.name.to_string(),
+                TextStyle {
+                    font: font_handle,
+                    ..default()
+                })
+                .with_style(Style {
+                    position_type: PositionType::Absolute,
+                    bottom: Val::Px(5.0),
+                    right: Val::Px(5.0),
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+            ))
+            .insert(ItemUI);
+        } else {
+            for item_entity in item_ui_q.iter() {
+                commands.entity(item_entity).despawn_recursive();
+            }
         }
     }
 }
