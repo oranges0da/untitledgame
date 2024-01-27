@@ -46,7 +46,7 @@ impl Item {
 }
 
 #[derive(Resource)]
-pub struct Items {
+struct Items {
     items: HashMap<String, Item>,
 }
 
@@ -176,12 +176,11 @@ fn spawn_item_ui(
     // Spawn item box outline.
     commands.spawn(NodeBundle {
         style: Style {
-            position_type: PositionType::Absolute,
             width: Val::Px(30.),
             height: Val::Px(30.),
             top: Val::Px(30.),
-            right: Val::Px(30.),
-            border: UiRect::all(Val::Px(5.)),
+            left: Val::Px(30.),
+            border: UiRect::all(Val::Px(2.)),
             padding: UiRect::all(Val::Px(30.)),
             ..default()
         },
@@ -208,8 +207,8 @@ fn update_item_ui(
                 },
                 style: Style {
                     position_type: PositionType::Absolute,
-                    top: Val::Px(50.),
-                    right: Val::Px(50.),
+                    top: Val::Px(45.),
+                    left: Val::Px(45.),
                     ..default()
                 },
                 ..default()
@@ -226,9 +225,8 @@ fn update_item_ui(
                 })
                 .with_style(Style {
                     position_type: PositionType::Absolute,
-                    bottom: Val::Px(5.0),
-                    right: Val::Px(5.0),
-                    justify_content: JustifyContent::Center,
+                    bottom: Val::Px(10.),
+                    left: Val::Px(10.),
                     ..default()
                 },
             ))
