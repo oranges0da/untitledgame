@@ -28,6 +28,9 @@ fn spawn_bg(
     });
 }
 
+#[derive(Component)]
+pub struct GroundTile;
+
 fn spawn_map(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -64,6 +67,7 @@ fn spawn_map(
                 },
                 ..default()
             })
+            .insert(GroundTile)
             .insert(Collider::cuboid(TILE_SIZE / 2., TILE_SIZE / 2.));
 
         for y in -300..=GROUND_LEVEL as i32 {

@@ -55,7 +55,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
         .insert(AdditionalMassProperties::Mass(10.0)) // Set mass of player.
         .insert(GravityScale(2.0)) // Subject player body to gravity.
         .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
-        .insert(Collider::cuboid(13., 13.));
+        .insert(Collider::cuboid(16., 16.));
 }
 
 fn player_movement(
