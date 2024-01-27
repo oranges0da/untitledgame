@@ -27,7 +27,7 @@ pub enum PlayerAnimationType {
     Fall,
 }
 
-#[derive(Component, Clone)]
+#[derive(Component, Clone, Debug)]
 pub struct PlayerAnimation {
     pub len: usize,
     pub frame_time: f32,
@@ -59,7 +59,7 @@ impl FromWorld for PlayerAnimations {
         map.add(
             PlayerAnimationType::Idle,
             PlayerAnimation {
-                len: 5,
+                len: 4,
                 frame_time: 0.2,
                 path: "player/idle".to_string(),
             },
@@ -176,7 +176,7 @@ fn change_player_animation(
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path.clone());
-    let texture_atlas = if path == "player/run.png" || path == "player/run_idle.png" {
+    let texture_atlas = if path == "player/run.png" || path == "player/idle.png" {
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 6, 1, None, None)
     } else {
         TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 5, 1, None, None)
@@ -243,14 +243,15 @@ fn animate_item_idle(
 }
 
 fn animate_item_in_inv(
-    player_q: Query<(&Transform, &Player)>,
+    player_q: Query<(&Player, &Transform, &mut TextureAtlasSprite), With<Player>>,
     mut item_q: Query<(&mut Transform, &Item), Without<Player>>,
 ) {
     const X_OFFSET: f32 = 20.;
     const Y_OFFSET: f32 = 5.;
 
-    let (player_pos, player) = player_q.single();
-
+    let (player, player_pos, sprite) = player_q.single();
+    let mut index_num: f32 = 0.;
+    
     for (mut item_pos, item) in item_q.iter_mut() {
         if item.in_inv {
             // Offset to render item in player's hands.
