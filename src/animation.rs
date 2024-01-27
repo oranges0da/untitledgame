@@ -1,6 +1,6 @@
 use crate::item::Item;
-use crate::player::Player;
 use crate::map::GroundTile;
+use crate::player::Player;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 use std::collections::HashMap;
@@ -25,7 +25,6 @@ pub enum PlayerAnimationType {
     Idle,
     Run,
     Jump,
-    Fall,
 }
 
 #[derive(Component, Clone, Debug)]
@@ -152,18 +151,22 @@ fn change_player_animation(
                 KeyCode::S,
                 KeyCode::Down,
             ])
-            // Velocity is somewhere between -0.02 and 0.02, which is standing still on the y-axis in the eyes of Rapier.
-            // && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
+        // Velocity is somewhere between -0.02 and 0.02, which is standing still on the y-axis in the eyes of Rapier.
+        // && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
         {
             PlayerAnimationType::Run
-        } else if vel.linvel.y > VEL_LIMIT && keyboard_input.any_just_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
+        } else if vel.linvel.y > VEL_LIMIT
+            && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space])
+        {
             PlayerAnimationType::Jump
         } else {
             PlayerAnimationType::Idle
         };
 
     // Get relevant animation and set path accordingly.
-    let Some(new_animation) = animation_res.get(curr_animation_id) else { return; };
+    let Some(new_animation) = animation_res.get(curr_animation_id) else {
+        return;
+    };
     let path = format!("{}.png", new_animation.path);
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
@@ -171,7 +174,7 @@ fn change_player_animation(
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
         new_animation.tile_size,
-        new_animation.columns, 
+        new_animation.columns,
         new_animation.rows,
         None,
         None,
@@ -207,7 +210,7 @@ fn flip_player(
 
 // Animate idle item on floor.
 fn animate_item_idle(
-    mut item_q: Query<&mut Transform, With<Item>>, 
+    mut item_q: Query<&mut Transform, With<Item>>,
     mut frame_time: Local<i32>,
     mut switch: Local<i32>,
 ) {

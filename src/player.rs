@@ -37,7 +37,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
         .spawn((
             SpriteSheetBundle {
                 transform: Transform {
-                    scale: Vec3::new(2.2, 2.2, 0.),
+                    scale: Vec3::new(2.5, 2.5, 0.),
                     translation: Vec3::new(0., 0., 1.), // Setting z-index to 1 will make sure player is drawn over everything else.
                     rotation: Quat::IDENTITY, // Set the initial rotation to identity
                     ..default()
@@ -55,7 +55,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
         .insert(AdditionalMassProperties::Mass(10.0)) // Set mass of player.
         .insert(GravityScale(2.0)) // Subject player body to gravity.
         .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
-        .insert(Collider::cuboid(16., 16.));
+        .insert(Collider::cuboid(10., 10.));
 }
 
 fn player_movement(
