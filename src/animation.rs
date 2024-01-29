@@ -1,5 +1,4 @@
 use crate::item::Item;
-use crate::map::GroundTile;
 use crate::player::Player;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -24,7 +23,7 @@ impl Plugin for AnimationPlugin {
 pub enum PlayerAnimationType {
     Idle,
     Run,
-    Jump,
+    Air,
 }
 
 #[derive(Component, Clone, Debug)]
@@ -32,9 +31,6 @@ pub struct PlayerAnimation {
     pub len: usize,
     pub frame_time: f32,
     pub path: String,
-    pub tile_size: Vec2,
-    pub rows: usize,
-    pub columns: usize,
 }
 
 #[derive(Resource)]
@@ -62,35 +58,26 @@ impl FromWorld for PlayerAnimations {
         map.add(
             PlayerAnimationType::Idle,
             PlayerAnimation {
-                len: 7,
-                frame_time: 0.1,
+                len: 4,
+                frame_time: 0.2,
                 path: "player/idle".to_string(),
-                tile_size: Vec2::new(32., 32.),
-                rows: 1,
-                columns: 8,
             },
         );
         map.add(
             PlayerAnimationType::Run,
             PlayerAnimation {
-                len: 7,
-                frame_time: 0.1,
+                len: 5,
+                frame_time: 0.12,
                 path: "player/run".to_string(),
-                tile_size: Vec2::new(32., 32.),
-                rows: 1,
-                columns: 8,
             },
         );
 
         map.add(
-            PlayerAnimationType::Jump,
+            PlayerAnimationType::Air,
             PlayerAnimation {
-                len: 3,
+                len: 1,
                 frame_time: 0.1,
-                path: "player/jump".to_string(),
-                tile_size: Vec2::new(32., 32.),
-                rows: 1,
-                columns: 4,
+                path: "player/fall".to_string(),
             },
         );
 
@@ -104,7 +91,6 @@ fn animate_player(
     time: Res<Time>,
 ) {
     for (mut player, mut sprite) in player_query.iter_mut() {
-        info!("Sprite index: {:?}", sprite.index);
         player.frame_time += time.delta_seconds();
 
         if player.frame_time > player.animation.frame_time {
@@ -113,10 +99,9 @@ fn animate_player(
             // Animate!
             sprite.index += frames_elapsed as usize;
 
-            // If sprite index is length of animation, (animation is finished)
-            // reset sprite index. (Restart animation.)
-            if sprite.index == player.animation.len {
-                sprite.index = 0;
+            // If sprite index becomes greater than length of total animation frames, reset sprite index. (Restart animation)
+            if sprite.index >= player.animation.len {
+                sprite.index %= player.animation.len;
             }
 
             // Subtract total frames from frame_time as to not accumulate in frame_time.
@@ -128,6 +113,7 @@ fn animate_player(
 // Change current player animation and spritesheet according to specified logic.
 fn change_player_animation(
     mut player_q: Query<&mut Player>,
+    item_q: Query<&mut Item>,
     keyboard_input: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
@@ -137,6 +123,17 @@ fn change_player_animation(
 ) {
     // Cannot simply change jumping and falling animations when velocity is 0, since Bevy Rapier sometimes sets velocity to -0 for some reason.
     const VEL_LIMIT: f32 = 0.02;
+
+    // Needed for setting correct spritesheet for player.
+    let mut has_item: bool = false;
+    for item in item_q.iter() {
+        if item.in_inv {
+            has_item = true;
+            break;
+        } else {
+            has_item = false;
+        }
+    }
 
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
@@ -151,39 +148,34 @@ fn change_player_animation(
                 KeyCode::S,
                 KeyCode::Down,
             ])
-        // Velocity is somewhere between -0.02 and 0.02, which is standing still on the y-axis in the eyes of Rapier.
-        // && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
+            // Velocity is somewhere between -0.02 and 0.02, which is standing still on the y-axis in the eyes of Rapier.
+            // && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
         {
             PlayerAnimationType::Run
-        } else if vel.linvel.y > VEL_LIMIT
-            && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space])
-        {
-            PlayerAnimationType::Jump
+        } else if vel.linvel.y > VEL_LIMIT && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
+            PlayerAnimationType::Air
         } else {
             PlayerAnimationType::Idle
-        };
+    };
 
     // Get relevant animation and set path accordingly.
-    let Some(new_animation) = animation_res.get(curr_animation_id) else {
-        return;
-    };
-    let path = format!("{}.png", new_animation.path);
+    let Some(new_animation) = animation_res.get(curr_animation_id) else { return; };
+    let path = if has_item { format!("{}_item.png", new_animation.path) } else { format!("{}.png", new_animation.path) };
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path.clone());
-    let texture_atlas = TextureAtlas::from_grid(
-        texture_handle,
-        new_animation.tile_size,
-        new_animation.columns,
-        new_animation.rows,
-        None,
-        None,
-    );
+    let texture_atlas = if path == "player/run.png" || path == "player/idle.png" {
+        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 6, 1, None, None)
+    } else {
+        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 5, 1, None, None)
+    };
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     // Set player's animation and spritesheet to relevant data.
     player.animation = new_animation;
-    *atlas = texture_atlas_handle
+    if *atlas != texture_atlas_handle {
+        *atlas = texture_atlas_handle
+    }
 }
 
 fn flip_player(
@@ -210,7 +202,7 @@ fn flip_player(
 
 // Animate idle item on floor.
 fn animate_item_idle(
-    mut item_q: Query<&mut Transform, With<Item>>,
+    mut item_q: Query<&mut Transform, With<Item>>, 
     mut frame_time: Local<i32>,
     mut switch: Local<i32>,
 ) {
@@ -246,7 +238,8 @@ fn animate_item_in_inv(
     const Y_OFFSET: f32 = 5.;
 
     let (player, player_pos, sprite) = player_q.single();
-
+    let mut index_num: f32 = 0.;
+    
     for (mut item_pos, item) in item_q.iter_mut() {
         if item.in_inv {
             // Offset to render item in player's hands.

@@ -4,9 +4,9 @@
 </div>
 
 <p align="center">
-    <img src="https://img.itch.zone/aW1hZ2UvOTkyNjM1LzU2NDczNzUuZ2lm/347x500/VkU3TI.gif">
+    <img src="https://img.itch.zone/aW1hZ2UvMjIxMTY4My8xMzA4MDQyMi5naWY=/original/ZGtfct.gif" />
 </p>
 
 ## Made with [Rust](https://rust-lang.org) and [Bevy](https://bevyengine.org), as well as [Rapier](https://rapier.rs) for physics.
 
-### Protagonist art cred [here](https://brewpanda.itch.io/character-base).
+### Protagonist art cred [here](https://grafxkid.itch.io/sprite-pack-8).
