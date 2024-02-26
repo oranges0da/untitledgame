@@ -33,9 +33,6 @@ fn main() {
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(camera::CameraPlugin)
         .add_plugins(debug::DebugPlugin)
-        .add_plugins(player::PlayerPlugin)
-        .add_plugins(animation::AnimationPlugin)
         .add_plugins(map::MapPlugin)
-        .add_plugins(item::ItemPlugin)
         .run();
 }

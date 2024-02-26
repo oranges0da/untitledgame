@@ -77,7 +77,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 1,
                 frame_time: 0.1,
-                path: "player/fall".to_string(),
+                path: "player/air".to_string(),
             },
         );
 
@@ -139,8 +139,7 @@ fn change_player_animation(
     let mut atlas = texture_atlas_query.single_mut();
     let vel = vel_q.single();
 
-    let curr_animation_id =
-        if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
+    let curr_animation_id = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
             && !keyboard_input.any_pressed([
                 KeyCode::W,
                 KeyCode::Up,
@@ -149,18 +148,26 @@ fn change_player_animation(
                 KeyCode::Down,
             ])
             // Velocity is somewhere between -0.02 and 0.02, which is standing still on the y-axis in the eyes of Rapier.
-            // && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
-        {
-            PlayerAnimationType::Run
-        } else if vel.linvel.y > VEL_LIMIT && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space]) {
-            PlayerAnimationType::Air
-        } else {
-            PlayerAnimationType::Idle
+            && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
+    {
+        PlayerAnimationType::Run
+    } else if vel.linvel.y > VEL_LIMIT
+        && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space])
+    {
+        PlayerAnimationType::Air
+    } else {
+        PlayerAnimationType::Idle
     };
 
     // Get relevant animation and set path accordingly.
-    let Some(new_animation) = animation_res.get(curr_animation_id) else { return; };
-    let path = if has_item { format!("{}_item.png", new_animation.path) } else { format!("{}.png", new_animation.path) };
+    let Some(new_animation) = animation_res.get(curr_animation_id) else {
+        return;
+    };
+    let path = if has_item {
+        format!("{}_item.png", new_animation.path)
+    } else {
+        format!("{}.png", new_animation.path)
+    };
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path.clone());
@@ -202,7 +209,7 @@ fn flip_player(
 
 // Animate idle item on floor.
 fn animate_item_idle(
-    mut item_q: Query<&mut Transform, With<Item>>, 
+    mut item_q: Query<&mut Transform, With<Item>>,
     mut frame_time: Local<i32>,
     mut switch: Local<i32>,
 ) {
@@ -239,7 +246,7 @@ fn animate_item_in_inv(
 
     let (player, player_pos, sprite) = player_q.single();
     let mut index_num: f32 = 0.;
-    
+
     for (mut item_pos, item) in item_q.iter_mut() {
         if item.in_inv {
             // Offset to render item in player's hands.
@@ -250,6 +257,8 @@ fn animate_item_in_inv(
             } else {
                 item_pos.translation.x = player_pos.translation.x - X_OFFSET;
             }
+
+            if player.animation.path == "player/idle" {}
         }
     }
 }
