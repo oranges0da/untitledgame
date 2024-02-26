@@ -36,9 +36,28 @@ fn spawn_map(
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
+    // Spawn two tiles side by side.
     commands.spawn(SpriteSheetBundle {
-        texture_atlas: texture_atlas_handle,
-        transform: Transform::from_scale(Vec3::new(SCALE, SCALE, 0.)),
+        texture_atlas: texture_atlas_handle.clone(),
+        transform: Transform {
+            scale: Vec3::new(SCALE, SCALE, 0.),
+            ..default()
+        },
+        sprite: TextureAtlasSprite {
+            index: 1,
+            ..default()
+        },
+        ..default()
+    })
+    .insert(GroundTile::Grass);
+
+    commands.spawn(SpriteSheetBundle {
+        texture_atlas: texture_atlas_handle.clone(),
+        transform: Transform {
+            translation: Vec3::new(32., -32., 0.),
+            scale: Vec3::new(SCALE, SCALE, 0.),
+            ..default()
+        },
         sprite: TextureAtlasSprite {
             index: 1,
             ..default()

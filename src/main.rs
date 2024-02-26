@@ -7,6 +7,7 @@ mod camera;
 mod debug;
 mod item;
 mod map;
+mod mouse;
 mod player;
 
 fn main() {
@@ -34,5 +35,6 @@ fn main() {
         .add_plugins(camera::CameraPlugin)
         .add_plugins(debug::DebugPlugin)
         .add_plugins(map::MapPlugin)
+        .add_plugins(mouse::MousePlugin)
         .run();
 }
