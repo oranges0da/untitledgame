@@ -39,24 +39,27 @@ fn spawn_map(
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
-    // Generate row of blocks.
-    for x in 0..MAP_SIZE {
-        let x_offset: f32 = (x as f32 * SCALED_TILE_SIZE * 0.5);
-        let y_offset: f32 = (x as f32 * SCALED_TILE_SIZE * 0.25);
+    for y in 0..MAP_SIZE {
+        let outer_x_offset: f32 = y as f32 * 10.;
+        info!("Outer offset: {}", outer_x_offset);
+        for x in 0..MAP_SIZE {
+            let x_offset: f32 = (x as f32 * SCALED_TILE_SIZE * 0.5);
+            let y_offset: f32 = x_offset / 2.;
 
-        commands.spawn(SpriteSheetBundle {
-            texture_atlas: texture_atlas_handle.clone(),
-            transform: Transform {
-                translation: Vec3::new(SCALED_TILE_SIZE + x_offset, -SCALED_TILE_SIZE - y_offset, 0.),
-                scale: Vec3::new(SCALE, SCALE, 0.),
+            commands.spawn(SpriteSheetBundle {
+                texture_atlas: texture_atlas_handle.clone(),
+                transform: Transform {
+                    translation: Vec3::new(SCALED_TILE_SIZE + x_offset - outer_x_offset, -SCALED_TILE_SIZE - y_offset - outer_x_offset, 0.),
+                    scale: Vec3::new(SCALE, SCALE, 0.),
+                    ..default()
+                },
+                sprite: TextureAtlasSprite {
+                    index: 1,
+                    ..default()
+                },
                 ..default()
-            },
-            sprite: TextureAtlasSprite {
-                index: 1,
-                ..default()
-            },
-            ..default()
-        })
-        .insert(GroundTile::Grass);
+            })
+            .insert(GroundTile::Grass);
+        }
     }
 }
