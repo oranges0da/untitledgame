@@ -36,5 +36,7 @@ fn main() {
         .add_plugins(debug::DebugPlugin)
         .add_plugins(map::MapPlugin)
         .add_plugins(mouse::MousePlugin)
+        .add_plugins(player::PlayerPlugin)
+        .add_plugins(animation::AnimationPlugin)
         .run();
 }

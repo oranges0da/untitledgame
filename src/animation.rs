@@ -22,8 +22,14 @@ impl Plugin for AnimationPlugin {
 #[derive(Component, Eq, PartialEq, Hash)]
 pub enum PlayerAnimationType {
     Idle,
-    Run,
-    Air,
+    Walk(WalkDirection),
+}
+
+#[derive(Component, Eq, PartialEq, Hash)]
+pub enum WalkDirection {
+    Front,
+    Back,
+    Side,
 }
 
 #[derive(Component, Clone, Debug)]
@@ -58,26 +64,36 @@ impl FromWorld for PlayerAnimations {
         map.add(
             PlayerAnimationType::Idle,
             PlayerAnimation {
-                len: 4,
+                len: 6,
                 frame_time: 0.2,
-                path: "player/idle".to_string(),
-            },
-        );
-        map.add(
-            PlayerAnimationType::Run,
-            PlayerAnimation {
-                len: 5,
-                frame_time: 0.12,
-                path: "player/run".to_string(),
+                path: "player/idle_front".to_string(),
             },
         );
 
         map.add(
-            PlayerAnimationType::Air,
+            PlayerAnimationType::Walk(WalkDirection::Front),
             PlayerAnimation {
-                len: 1,
-                frame_time: 0.1,
-                path: "player/air".to_string(),
+                len: 6,
+                frame_time: 0.2,
+                path: "player/walk_front".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(WalkDirection::Back),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.2,
+                path: "player/walk_back".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(WalkDirection::Side),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.2,
+                path: "player/walk_side".to_string(),
             },
         );
 
@@ -139,22 +155,12 @@ fn change_player_animation(
     let mut atlas = texture_atlas_query.single_mut();
     let vel = vel_q.single();
 
-    let curr_animation_id = if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right, KeyCode::A, KeyCode::Left])
-            && !keyboard_input.any_pressed([
-                KeyCode::W,
-                KeyCode::Up,
-                KeyCode::Space,
-                KeyCode::S,
-                KeyCode::Down,
-            ])
-            // Velocity is somewhere between -0.02 and 0.02, which is standing still on the y-axis in the eyes of Rapier.
-            && vel.linvel.y < VEL_LIMIT && vel.linvel.y > -VEL_LIMIT
-    {
-        PlayerAnimationType::Run
-    } else if vel.linvel.y > VEL_LIMIT
-        && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up, KeyCode::Space])
-    {
-        PlayerAnimationType::Air
+    let curr_animation_id = if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
+        PlayerAnimationType::Walk(WalkDirection::Front)
+    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
+        PlayerAnimationType::Walk(WalkDirection::Back)
+    } else if keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right]) {
+        PlayerAnimationType::Walk(WalkDirection::Side)
     } else {
         PlayerAnimationType::Idle
     };
@@ -163,19 +169,11 @@ fn change_player_animation(
     let Some(new_animation) = animation_res.get(curr_animation_id) else {
         return;
     };
-    let path = if has_item {
-        format!("{}_item.png", new_animation.path)
-    } else {
-        format!("{}.png", new_animation.path)
-    };
+    let path = format!("{}.png", &new_animation.path);
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
-    let texture_handle = asset_server.load(path.clone());
-    let texture_atlas = if path == "player/run.png" || path == "player/idle.png" {
-        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 6, 1, None, None)
-    } else {
-        TextureAtlas::from_grid(texture_handle, Vec2::new(32., 26.), 5, 1, None, None)
-    };
+    let texture_handle = asset_server.load(path);
+    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64., 64.), 6, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     // Set player's animation and spritesheet to relevant data.

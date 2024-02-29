@@ -1,4 +1,4 @@
-use crate::animation::{PlayerAnimation, PlayerAnimationType, PlayerAnimations};
+use crate::animation::{PlayerAnimation, PlayerAnimationType, PlayerAnimations, WalkDirection};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -28,7 +28,7 @@ impl Plugin for PlayerPlugin {
 
 fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
     // Get idle animation to play on spawn.
-    let Some(animation) = animation_res.get(PlayerAnimationType::Idle) else {
+    let Some(animation) = animation_res.get(PlayerAnimationType::Walk(WalkDirection::Front)) else {
         error!("Failed to find animation: Idle");
         return;
     };
@@ -50,10 +50,8 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
                 is_facing_right: true, // Sprite is facing right.
             },
         ))
-        .insert(RigidBody::Dynamic)
         .insert(Velocity::default())
         .insert(AdditionalMassProperties::Mass(10.0)) // Set mass of player.
-        .insert(GravityScale(2.0)) // Subject player body to gravity.
         .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
         .insert(Collider::cuboid(13., 13.));
 }
@@ -68,13 +66,21 @@ fn player_movement(
     const SPEED: f32 = 250.;
 
     if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
-        direction += Vec3::new(-100., 0., 0.);
+        direction += Vec3::new(-1., 0., 0.);
         player.is_facing_right = false;
     }
 
     if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
         direction += Vec3::new(1., 0., 0.);
         player.is_facing_right = true;
+    }
+
+    if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
+        direction += Vec3::new(0., 1., 0.);
+    }
+
+    if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
+        direction += Vec3::new(0., -1., 0.);
     }
 
     if direction.length() > 0. {
