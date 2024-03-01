@@ -21,14 +21,13 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
-            .add_systems(Update, player_movement)
-            .add_systems(Update, player_jump);
+            .add_systems(Update, player_movement);
     }
 }
 
 fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
     // Get idle animation to play on spawn.
-    let Some(animation) = animation_res.get(PlayerAnimationType::Walk(WalkDirection::Front)) else {
+    let Some(idle_animation) = animation_res.get(PlayerAnimationType::Idle) else {
         error!("Failed to find animation: Idle");
         return;
     };
@@ -39,21 +38,20 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
                 transform: Transform {
                     scale: Vec3::new(2.2, 2.2, 0.),
                     translation: Vec3::new(0., 0., 1.), // Setting z-index to 1 will make sure player is drawn over everything else.
-                    rotation: Quat::IDENTITY, // Set the initial rotation to identity
+                    rotation: Quat::IDENTITY, // Set the initial rotation to identity. (None, I think?)
                     ..default()
                 },
                 ..default()
             },
             Player {
-                animation,
+                animation: idle_animation,
                 frame_time: 0.6,
                 is_facing_right: true, // Sprite is facing right.
             },
         ))
-        .insert(Velocity::default())
-        .insert(AdditionalMassProperties::Mass(10.0)) // Set mass of player.
+        .insert(RigidBody::Fixed)
         .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
-        .insert(Collider::cuboid(13., 13.));
+        .insert(Collider::cuboid(12., 12.));
 }
 
 fn player_movement(
@@ -61,9 +59,10 @@ fn player_movement(
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
+    const SPEED: f32 = 250.;
+
     let (mut player, mut pos) = player_q.single_mut();
     let mut direction = Vec3::ZERO;
-    const SPEED: f32 = 250.;
 
     if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
         direction += Vec3::new(-1., 0., 0.);
@@ -90,17 +89,4 @@ fn player_movement(
     // Setting translation vector to product of updated direction vector
     // delta_seconds returns time elapsed since last frame, used to make movement frame-rate independent
     pos.translation += direction * SPEED * time.delta_seconds();
-}
-
-fn player_jump(
-    mut vel_q: Query<&mut Velocity, With<Player>>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
-    let mut vel = vel_q.single_mut();
-
-    if keyboard_input.any_pressed([KeyCode::Up, KeyCode::Space, KeyCode::W]) {
-        vel.linvel.y = 200.;
-    } else {
-        vel.linvel.y = vel.linvel.y.min(0.0);
-    }
 }

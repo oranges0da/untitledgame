@@ -38,5 +38,6 @@ fn main() {
         .add_plugins(mouse::MousePlugin)
         .add_plugins(player::PlayerPlugin)
         .add_plugins(animation::AnimationPlugin)
+        .add_plugins(item::ItemPlugin)
         .run();
 }

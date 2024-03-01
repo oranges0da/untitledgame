@@ -109,26 +109,26 @@ fn spawn_idle_item(
             ..default()
         }
     )
-    .insert(ice_cream_item.clone())
-    .insert(Sensor)
-    .insert(ActiveEvents::COLLISION_EVENTS)
-    .insert(Collider::cuboid(16., 16.));
+    .insert(ice_cream_item.clone());
+    // .insert(Sensor)
+    // .insert(ActiveEvents::COLLISION_EVENTS)
+    // .insert(Collider::cuboid(16., 16.));
 
-    commands.spawn(
-        SpriteBundle {
-            texture: asset_server.load(soda_item.icon_path.to_string()),
-            transform: Transform {
-                translation: Vec3::new(-200., -50., 1.1),
-                scale: Vec3::new(1., 1., 0.),
-                ..default()
-            },
-            ..default()
-        }
-    )
-    .insert(soda_item.clone())
-    .insert(Sensor)
-    .insert(ActiveEvents::COLLISION_EVENTS)
-    .insert(Collider::cuboid(16., 16.));
+    // commands.spawn(
+    //     SpriteBundle {
+    //         texture: asset_server.load(soda_item.icon_path.to_string()),
+    //         transform: Transform {
+    //             translation: Vec3::new(-200., -50., 1.1),
+    //             scale: Vec3::new(1., 1., 0.),
+    //             ..default()
+    //         },
+    //         ..default()
+    //     }
+    // )
+    // .insert(soda_item.clone())
+    // .insert(Sensor)
+    // .insert(ActiveEvents::COLLISION_EVENTS)
+    // .insert(Collider::cuboid(16., 16.));
 }
 
 // Check if player has "picked up" (collided with) an item.
@@ -171,7 +171,7 @@ fn drop_item(
 struct ItemUI;
 
 fn spawn_item_ui(
-    mut commands: Commands, 
+    mut commands: Commands,
 ) {
     // Spawn item box outline.
     commands.spawn(NodeBundle {

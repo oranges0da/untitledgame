@@ -65,7 +65,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Idle,
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.2,
+                frame_time: 0.15,
                 path: "player/idle_front".to_string(),
             },
         );
@@ -74,7 +74,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(WalkDirection::Front),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.2,
+                frame_time: 0.1,
                 path: "player/walk_front".to_string(),
             },
         );
@@ -83,7 +83,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(WalkDirection::Back),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.2,
+                frame_time: 0.1,
                 path: "player/walk_back".to_string(),
             },
         );
@@ -92,7 +92,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(WalkDirection::Side),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.2,
+                frame_time: 0.1,
                 path: "player/walk_side".to_string(),
             },
         );
@@ -134,12 +134,8 @@ fn change_player_animation(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut texture_atlas_query: Query<&mut Handle<TextureAtlas>, With<Player>>,
-    vel_q: Query<&Velocity, With<Player>>,
     animation_res: Res<PlayerAnimations>,
 ) {
-    // Cannot simply change jumping and falling animations when velocity is 0, since Bevy Rapier sometimes sets velocity to -0 for some reason.
-    const VEL_LIMIT: f32 = 0.02;
-
     // Needed for setting correct spritesheet for player.
     let mut has_item: bool = false;
     for item in item_q.iter() {
@@ -153,7 +149,6 @@ fn change_player_animation(
 
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
-    let vel = vel_q.single();
 
     let curr_animation_id = if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
         PlayerAnimationType::Walk(WalkDirection::Front)
