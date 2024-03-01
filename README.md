@@ -4,7 +4,7 @@
 </div>
 
 <p align="center">
-    <img src="https://img.itch.zone/aW1hZ2UvMjIxMTY4My8xMzA4MDQyMi5naWY=/original/ZGtfct.gif" />
+    <img src="https://img.itch.zone/aW1nLzc5MTU5MjMuZ2lm/original/gNdKjy.gif" />
 </p>
 
 ## Made with [Rust](https://rust-lang.org) and [Bevy](https://bevyengine.org), as well as [Rapier](https://rapier.rs) for physics.
