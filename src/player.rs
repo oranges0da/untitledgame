@@ -1,6 +1,5 @@
 use crate::animation::{PlayerAnimation, PlayerAnimationType, PlayerAnimations, WalkDirection};
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub struct Player {
@@ -48,10 +47,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
                 frame_time: 0.6,
                 is_facing_right: true, // Sprite is facing right.
             },
-        ))
-        .insert(RigidBody::Fixed)
-        .insert(ActiveEvents::COLLISION_EVENTS) // Necessary for Rapier to recieve collision events.
-        .insert(Collider::cuboid(12., 12.));
+        ));
 }
 
 fn player_movement(

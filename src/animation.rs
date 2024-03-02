@@ -1,7 +1,6 @@
 use crate::item::Item;
 use crate::player::Player;
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Component)]
