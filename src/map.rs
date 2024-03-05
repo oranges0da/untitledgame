@@ -5,7 +5,7 @@ pub struct MapPlugin;
 
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
-            app.add_systems(Startup, spawn_map);
+            app.add_systems(PreStartup, spawn_map);
     }
 }
 
@@ -15,7 +15,7 @@ pub enum GroundTile {
     Dirt,
 }
 
-// Try to spawn single tile for now.
+// Spawn tile blocks.
 fn spawn_map(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -38,17 +38,16 @@ fn spawn_map(
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
-    for y in 0..MAP_SIZE {
+    for y in 0..MAP_SIZE * 10 {
         let outer_x_offset: f32 = y as f32 * 10.;
-        info!("Outer offset: {}", outer_x_offset);
-        for x in 0..MAP_SIZE {
+        for x in 0..MAP_SIZE * 10 {
             let x_offset: f32 = (x as f32 * SCALED_TILE_SIZE * 0.5);
             let y_offset: f32 = x_offset / 2.;
 
             commands.spawn(SpriteSheetBundle {
                 texture_atlas: texture_atlas_handle.clone(),
                 transform: Transform {
-                    translation: Vec3::new(SCALED_TILE_SIZE + x_offset - outer_x_offset, -SCALED_TILE_SIZE - y_offset - outer_x_offset, 0.9),
+                    translation: Vec3::new(SCALED_TILE_SIZE + x_offset - outer_x_offset, -SCALED_TILE_SIZE - y_offset - outer_x_offset, 0.),
                     scale: Vec3::new(SCALE, SCALE, 0.),
                     ..default()
                 },

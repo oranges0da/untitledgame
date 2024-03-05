@@ -25,6 +25,8 @@ impl Plugin for PlayerPlugin {
 }
 
 fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
+    const SCALE: f32 = 3.;
+
     // Get idle animation to play on spawn.
     let Some(idle_animation) = animation_res.get(PlayerAnimationType::Idle) else {
         error!("Failed to find animation: Idle");
@@ -35,7 +37,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
         .spawn((
             SpriteSheetBundle {
                 transform: Transform {
-                    scale: Vec3::new(2.2, 2.2, 0.),
+                    scale: Vec3::new(SCALE, SCALE, 0.),
                     translation: Vec3::new(0., 0., 1.), // Setting z-index to 1 will make sure player is drawn over everything else.
                     rotation: Quat::IDENTITY, // Set the initial rotation to identity. (None, I think?)
                     ..default()

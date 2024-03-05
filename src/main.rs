@@ -10,8 +10,9 @@ mod mouse;
 mod player;
 
 fn main() {
-    App::new()
-        .add_plugins(
+    let mut app = App::new();
+
+    app.add_plugins(
             DefaultPlugins
                 .set(ImagePlugin::default_nearest()) // Necessary to not spawn blurry sprites.
                 .set(WindowPlugin {
@@ -27,14 +28,14 @@ fn main() {
                     }),
                     ..default()
                 }),
-        )
-        .insert_resource(ClearColor(Color::rgb(0., 0., 0.))) // Set background color to black. (outer space!)
-        .add_plugins(camera::CameraPlugin)
-        .add_plugins(debug::DebugPlugin)
-        .add_plugins(map::MapPlugin)
-        .add_plugins(mouse::MousePlugin)
-        .add_plugins(player::PlayerPlugin)
-        .add_plugins(animation::AnimationPlugin)
-        .add_plugins(item::ItemPlugin)
-        .run();
+    );
+    app.insert_resource(ClearColor(Color::rgb(0., 0., 0.))); // Set background color to black. (outer space!)
+    app.add_plugins(camera::CameraPlugin);
+    app.add_plugins(debug::DebugPlugin);
+    app.add_plugins(map::MapPlugin);
+    app.add_plugins(mouse::MousePlugin);
+    app.add_plugins(player::PlayerPlugin);
+    app.add_plugins(animation::AnimationPlugin);
+    app.add_plugins(item::ItemPlugin);
+    app.run();
 }

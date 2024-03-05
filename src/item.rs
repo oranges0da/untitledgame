@@ -94,12 +94,11 @@ fn spawn_idle_item(
     item_res: Res<Items>,
 ) {
     let Some(ice_cream_item) = item_res.get("ice_cream".to_string()) else { return; };
-    let Some(soda_item) = item_res.get("soda".to_string()) else { return; };
 
     commands.spawn(
         SpriteBundle {
             texture: asset_server.load(ice_cream_item.icon_path.to_string()),
-            transform: Transform::from_translation(Vec3::new(100., -200., 1.)),
+            transform: Transform::from_translation(Vec3::new(100., -200., 0.)),
                 ..default()
         }
     )
