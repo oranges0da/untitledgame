@@ -25,7 +25,7 @@ impl Plugin for PlayerPlugin {
 }
 
 fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
-    const SCALE: f32 = 3.;
+    const SCALE: f32 = 0.5;
 
     // Get idle animation to play on spawn.
     let Some(idle_animation) = animation_res.get(PlayerAnimationType::Idle(Direction::South)) else {

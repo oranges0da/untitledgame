@@ -11,7 +11,6 @@ impl Plugin for AnimationPlugin {
         app.init_resource::<PlayerAnimations>()
             .add_systems(Update, animate_player)
             .add_systems(Update, change_player_animation)
-            .add_systems(Update, flip_player)
             .add_systems(Update, animate_item_idle)
             .add_systems(Update, animate_item_in_inv);
     }
@@ -262,7 +261,26 @@ fn change_player_animation(
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
 
-    let curr_animation_id = PlayerAnimationType::Walk(Direction::South);
+    // TODO: Make this cleaner.
+    let curr_animation_id = if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
+        PlayerAnimationType::Walk(Direction::NorthWest)
+    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
+        PlayerAnimationType::Walk(Direction::NorthEast)
+    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
+        PlayerAnimationType::Walk(Direction::SouthEast)
+    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) && keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
+        PlayerAnimationType::Walk(Direction::SouthWest)
+    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
+        PlayerAnimationType::Walk(Direction::North)
+    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
+        PlayerAnimationType::Walk(Direction::South)
+    } else if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
+        PlayerAnimationType::Walk(Direction::West)
+    } else if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
+        PlayerAnimationType::Walk(Direction::East)
+    } else {
+        PlayerAnimationType::Idle(Direction::South)
+    };
 
     // Get relevant animation and set path accordingly.
     let Some(new_animation) = animation_res.get(curr_animation_id) else {
