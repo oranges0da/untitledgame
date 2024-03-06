@@ -1,4 +1,4 @@
-use crate::animation::{PlayerAnimation, PlayerAnimationType, PlayerAnimations, WalkDirection};
+use crate::animation::{PlayerAnimation, PlayerAnimationType, PlayerAnimations, Direction};
 use bevy::prelude::*;
 
 #[derive(Component)]
@@ -28,7 +28,7 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
     const SCALE: f32 = 3.;
 
     // Get idle animation to play on spawn.
-    let Some(idle_animation) = animation_res.get(PlayerAnimationType::Idle) else {
+    let Some(idle_animation) = animation_res.get(PlayerAnimationType::Idle(Direction::South)) else {
         error!("Failed to find animation: Idle");
         return;
     };

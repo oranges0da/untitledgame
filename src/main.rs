@@ -29,7 +29,7 @@ fn main() {
                     ..default()
                 }),
     );
-    app.insert_resource(ClearColor(Color::rgb(0., 0., 0.))); // Set background color to black. (outer space!)
+    app.insert_resource(ClearColor(Color::rgb(0., 0., 0.))); // Set background color to black.
     app.add_plugins(camera::CameraPlugin);
     app.add_plugins(debug::DebugPlugin);
     app.add_plugins(map::MapPlugin);

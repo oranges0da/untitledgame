@@ -20,15 +20,20 @@ impl Plugin for AnimationPlugin {
 // Eq, PartialEq, and Hash necessary for animation to be inserted into HashMap world resource.
 #[derive(Component, Eq, PartialEq, Hash)]
 pub enum PlayerAnimationType {
-    Idle,
-    Walk(WalkDirection),
+    Idle(Direction),
+    Walk(Direction),
 }
 
 #[derive(Component, Eq, PartialEq, Hash)]
-pub enum WalkDirection {
-    Front,
-    Back,
-    Side,
+pub enum Direction {
+    North,
+    East,
+    West,
+    South,
+    NorthWest,
+    NorthEast,
+    SouthWest,
+    SouthEast,
 }
 
 #[derive(Component, Clone, Debug)]
@@ -61,38 +66,74 @@ impl FromWorld for PlayerAnimations {
         };
 
         map.add(
-            PlayerAnimationType::Idle,
+            PlayerAnimationType::Idle(Direction::South),
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.15,
-                path: "player/idle_front".to_string(),
+                path: "player/idle_south".to_string(),
             },
         );
 
         map.add(
-            PlayerAnimationType::Walk(WalkDirection::Front),
+            PlayerAnimationType::Idle(Direction::SouthWest),
             PlayerAnimation {
-                len: 6,
+                len: 4,
                 frame_time: 0.1,
-                path: "player/walk_front".to_string(),
+                path: "player/idle_southwest".to_string(),
             },
         );
 
         map.add(
-            PlayerAnimationType::Walk(WalkDirection::Back),
+            PlayerAnimationType::Idle(Direction::West),
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.1,
-                path: "player/walk_back".to_string(),
+                path: "player/idle_west".to_string(),
             },
         );
 
         map.add(
-            PlayerAnimationType::Walk(WalkDirection::Side),
+            PlayerAnimationType::Idle(Direction::NorthWest),
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.1,
-                path: "player/walk_side".to_string(),
+                path: "player/idle_northwest".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Idle(Direction::North),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/idle_north".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Idle(Direction::NorthEast),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/idle_northeast".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Idle(Direction::East),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/idle_east".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Idle(Direction::SouthEast),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/idle_southeast".to_string(),
             },
         );
 
@@ -149,15 +190,7 @@ fn change_player_animation(
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
 
-    let curr_animation_id = if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
-        PlayerAnimationType::Walk(WalkDirection::Front)
-    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
-        PlayerAnimationType::Walk(WalkDirection::Back)
-    } else if keyboard_input.any_pressed([KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right]) {
-        PlayerAnimationType::Walk(WalkDirection::Side)
-    } else {
-        PlayerAnimationType::Idle
-    };
+    let curr_animation_id = PlayerAnimationType::Idle(Direction::SouthEast);
 
     // Get relevant animation and set path accordingly.
     let Some(new_animation) = animation_res.get(curr_animation_id) else {
@@ -167,7 +200,7 @@ fn change_player_animation(
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path);
-    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(64., 64.), 6, 1, None, None);
+    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(500., 500.), 6, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     // Set player's animation and spritesheet to relevant data.
