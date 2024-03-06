@@ -70,7 +70,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.15,
-                path: "player/idle_south".to_string(),
+                path: "player/idle/idle_south".to_string(),
             },
         );
 
@@ -79,7 +79,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 4,
                 frame_time: 0.1,
-                path: "player/idle_southwest".to_string(),
+                path: "player/idle/idle_southwest".to_string(),
             },
         );
 
@@ -88,7 +88,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.1,
-                path: "player/idle_west".to_string(),
+                path: "player/idle/idle_west".to_string(),
             },
         );
 
@@ -97,7 +97,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.1,
-                path: "player/idle_northwest".to_string(),
+                path: "player/idle/idle_northwest".to_string(),
             },
         );
 
@@ -106,7 +106,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.1,
-                path: "player/idle_north".to_string(),
+                path: "player/idle/idle_north".to_string(),
             },
         );
 
@@ -115,7 +115,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.1,
-                path: "player/idle_northeast".to_string(),
+                path: "player/idle/idle_northeast".to_string(),
             },
         );
 
@@ -124,7 +124,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.1,
-                path: "player/idle_east".to_string(),
+                path: "player/idle/idle_east".to_string(),
             },
         );
 
@@ -133,7 +133,79 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimation {
                 len: 6,
                 frame_time: 0.1,
-                path: "player/idle_southeast".to_string(),
+                path: "player/idle/idle_southeast".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(Direction::South),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/walk/walk_south".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(Direction::SouthWest),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/walk/walk_southwest".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(Direction::West),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/walk/walk_west".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(Direction::NorthWest),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/walk/walk_northwest".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(Direction::North),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/walk/walk_north".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(Direction::NorthEast),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/walk/walk_northeast".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(Direction::East),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/walk/walk_east".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Walk(Direction::SouthEast),
+            PlayerAnimation {
+                len: 6,
+                frame_time: 0.1,
+                path: "player/walk/walk_southeast".to_string(),
             },
         );
 
@@ -190,7 +262,7 @@ fn change_player_animation(
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
 
-    let curr_animation_id = PlayerAnimationType::Idle(Direction::SouthEast);
+    let curr_animation_id = PlayerAnimationType::Walk(Direction::South);
 
     // Get relevant animation and set path accordingly.
     let Some(new_animation) = animation_res.get(curr_animation_id) else {

@@ -39,7 +39,6 @@ fn spawn_player(mut commands: Commands, animation_res: Res<PlayerAnimations>) {
                 transform: Transform {
                     scale: Vec3::new(SCALE, SCALE, 0.),
                     translation: Vec3::new(0., 0., 1.), // Setting z-index to 1 will make sure player is drawn over everything else.
-                    rotation: Quat::IDENTITY, // Set the initial rotation to identity. (None, I think?)
                     ..default()
                 },
                 ..default()
