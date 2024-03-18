@@ -17,13 +17,13 @@ impl Plugin for AnimationPlugin {
 }
 
 // Eq, PartialEq, and Hash necessary for animation to be inserted into HashMap world resource.
-#[derive(Component, Eq, PartialEq, Hash)]
+#[derive(Component, Eq, PartialEq, Hash, Clone, Copy)]
 pub enum PlayerAnimationType {
     Idle(Direction),
     Walk(Direction),
 }
 
-#[derive(Component, Eq, PartialEq, Hash)]
+#[derive(Component, Eq, PartialEq, Hash, Clone, Copy, Debug)]
 pub enum Direction {
     North,
     East,
@@ -68,7 +68,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Idle(Direction::South),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.15,
+                frame_time: 0.13,
                 path: "player/idle/idle_south".to_string(),
             },
         );
@@ -216,23 +216,27 @@ impl FromWorld for PlayerAnimations {
 fn animate_player(
     mut player_query: Query<(&mut Player, &mut TextureAtlasSprite), With<Player>>,
     time: Res<Time>,
+    animation_res: Res<PlayerAnimations>,
 ) {
     for (mut player, mut sprite) in player_query.iter_mut() {
-        player.frame_time += time.delta_seconds();
+        let Some(animation) = animation_res.get(player.animation) else {
+            return;
+        };
 
-        if player.frame_time > player.animation.frame_time {
-            let frames_elapsed = player.frame_time / player.animation.frame_time;
+        player.frame_time += time.delta_seconds();
+        if player.frame_time > animation.frame_time {
+            let frames_elapsed = player.frame_time / animation.frame_time;
 
             // Animate!
             sprite.index += frames_elapsed as usize;
 
             // If sprite index becomes greater than length of total animation frames, reset sprite index. (Restart animation)
-            if sprite.index >= player.animation.len {
-                sprite.index %= player.animation.len;
+            if sprite.index >= animation.len {
+                sprite.index %= animation.len;
             }
 
             // Subtract total frames from frame_time as to not accumulate in frame_time.
-            player.frame_time -= player.animation.frame_time * frames_elapsed as f32;
+            player.frame_time -= animation.frame_time * frames_elapsed as f32;
         }
     }
 }
@@ -247,28 +251,25 @@ fn change_player_animation(
     mut texture_atlas_query: Query<&mut Handle<TextureAtlas>, With<Player>>,
     animation_res: Res<PlayerAnimations>,
 ) {
-    // Needed for setting correct spritesheet for player.
-    let mut has_item: bool = false;
-    for item in item_q.iter() {
-        if item.in_inv {
-            has_item = true;
-            break;
-        } else {
-            has_item = false;
-        }
-    }
-
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
 
     // TODO: Make this cleaner.
-    let curr_animation_id = if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
+    let animation_id = if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
+        && keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
+    {
         PlayerAnimationType::Walk(Direction::NorthWest)
-    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
+    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
+        && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
+    {
         PlayerAnimationType::Walk(Direction::NorthEast)
-    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
+    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
+        && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
+    {
         PlayerAnimationType::Walk(Direction::SouthEast)
-    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) && keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
+    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
+        && keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
+    {
         PlayerAnimationType::Walk(Direction::SouthWest)
     } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
         PlayerAnimationType::Walk(Direction::North)
@@ -279,46 +280,24 @@ fn change_player_animation(
     } else if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
         PlayerAnimationType::Walk(Direction::East)
     } else {
-        PlayerAnimationType::Idle(Direction::South)
+        player.animation.clone()
     };
 
     // Get relevant animation and set path accordingly.
-    let Some(new_animation) = animation_res.get(curr_animation_id) else {
+    let Some(new_animation) = animation_res.get(animation_id) else {
         return;
     };
     let path = format!("{}.png", &new_animation.path);
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path);
-    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(500., 500.), 6, 1, None, None);
+    let texture_atlas =
+        TextureAtlas::from_grid(texture_handle, Vec2::new(500., 500.), 6, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
-    // Set player's animation and spritesheet to relevant data.
-    player.animation = new_animation;
+    // Set player's spritesheet to relevant data.
     if *atlas != texture_atlas_handle {
         *atlas = texture_atlas_handle
-    }
-}
-
-fn flip_player(
-    mut player_sprite: Query<&mut TextureAtlasSprite, With<Player>>,
-    keyboard_input: Res<Input<KeyCode>>,
-) {
-    let mut sprite = player_sprite.single_mut();
-
-    // Flip sprite on x-axis when changing directions.
-    // Player sprite spawns facing to the right direction, so flipping when moving left necessary.
-    if keyboard_input.any_just_pressed([KeyCode::A, KeyCode::Left]) {
-        sprite.flip_x = true;
-    } else if keyboard_input.any_just_pressed([KeyCode::D, KeyCode::Right])
-        && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-    {
-        sprite.flip_x = false;
-    } else if keyboard_input.any_just_released([KeyCode::A, KeyCode::Left])
-        && !keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-        && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
-    {
-        sprite.flip_x = false;
     }
 }
 
@@ -367,13 +346,13 @@ fn animate_item_in_inv(
             // Offset to render item in player's hands.
             item_pos.translation.y = player_pos.translation.y - Y_OFFSET;
 
-            if player.is_facing_right() {
-                item_pos.translation.x = player_pos.translation.x + X_OFFSET;
-            } else {
-                item_pos.translation.x = player_pos.translation.x - X_OFFSET;
-            }
+            // if player.is_facing_right() {
+            //     item_pos.translation.x = player_pos.translation.x + X_OFFSET;
+            // } else {
+            //     item_pos.translation.x = player_pos.translation.x - X_OFFSET;
+            // }
 
-            if player.animation.path == "player/idle" {}
+            // if player.animation.path == "player/idle" {}
         }
     }
 }
