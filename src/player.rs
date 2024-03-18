@@ -8,6 +8,9 @@ pub struct Player {
     pub frame_time: f32, // To compare player's frame_time to animation's frame_time.
 }
 
+impl Player {
+}
+
 #[derive(Component)]
 pub struct PlayerPlugin;
 
@@ -78,20 +81,16 @@ fn player_movement(
 fn set_player_direction(mut player_q: Query<&mut Player>, keyboard_input: Res<Input<KeyCode>>) {
     let mut player = player_q.single_mut();
 
-    if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-        && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
+    if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
     {
         player.direction = Direction::NorthWest;
-    } else if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
-        && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
+    } else if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
     {
         player.direction = Direction::NorthEast;
-    } else if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-        && keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
+    } else if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) && keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
     {
         player.direction = Direction::SouthWest;
-    } else if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
-        && keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
+    } else if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) && keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
     {
         player.direction = Direction::SouthEast;
     } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
@@ -103,6 +102,4 @@ fn set_player_direction(mut player_q: Query<&mut Player>, keyboard_input: Res<In
     } else if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
         player.direction = Direction::East;
     }
-
-    info!("Direction: {:?}", player.direction);
 }

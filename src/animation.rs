@@ -254,33 +254,10 @@ fn change_player_animation(
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
 
-    // TODO: Make this cleaner.
-    let animation_id = if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
-        && keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-    {
-        PlayerAnimationType::Walk(Direction::NorthWest)
-    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
-        && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
-    {
-        PlayerAnimationType::Walk(Direction::NorthEast)
-    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
-        && keyboard_input.any_pressed([KeyCode::D, KeyCode::Right])
-    {
-        PlayerAnimationType::Walk(Direction::SouthEast)
-    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down])
-        && keyboard_input.any_pressed([KeyCode::A, KeyCode::Left])
-    {
-        PlayerAnimationType::Walk(Direction::SouthWest)
-    } else if keyboard_input.any_pressed([KeyCode::W, KeyCode::Up]) {
-        PlayerAnimationType::Walk(Direction::North)
-    } else if keyboard_input.any_pressed([KeyCode::S, KeyCode::Down]) {
-        PlayerAnimationType::Walk(Direction::South)
-    } else if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) {
-        PlayerAnimationType::Walk(Direction::West)
-    } else if keyboard_input.any_pressed([KeyCode::D, KeyCode::Right]) {
-        PlayerAnimationType::Walk(Direction::East)
+    let animation_id = if keyboard_input.any_pressed([KeyCode::W, KeyCode::D, KeyCode::S, KeyCode::A, KeyCode::Up, KeyCode::Right, KeyCode::Left, KeyCode::Down]) {
+        PlayerAnimationType::Walk(player.direction.clone())
     } else {
-        player.animation.clone()
+        PlayerAnimationType::Idle(player.direction.clone())
     };
 
     // Get relevant animation and set path accordingly.
