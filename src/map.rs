@@ -27,37 +27,28 @@ fn spawn_map(
     const MAP_SIZE: i32 = 20;
 
     // Cut out certain tile from tileset.
-    let texture_handle = asset_server.load("map/tiles.png");
+    let texture_handle = asset_server.load("map/rock_tiles.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
         Vec2::new(TILE_SIZE, TILE_SIZE + 2.),
-        11,
-        10,
+        4,
+        4,
         None,
         None,
     );
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
-    for y in 0..MAP_SIZE * 10 {
-        let outer_x_offset: f32 = y as f32 * 10.;
-        for x in 0..MAP_SIZE * 10 {
-            let x_offset: f32 = (x as f32 * SCALED_TILE_SIZE * 0.5);
-            let y_offset: f32 = x_offset / 2.;
-
-            commands.spawn(SpriteSheetBundle {
-                texture_atlas: texture_atlas_handle.clone(),
-                transform: Transform {
-                    translation: Vec3::new(SCALED_TILE_SIZE + x_offset - outer_x_offset, -SCALED_TILE_SIZE - y_offset - outer_x_offset, -1.),
-                    scale: Vec3::new(SCALE, SCALE, 0.),
-                    ..default()
-                },
-                sprite: TextureAtlasSprite {
-                    index: 1,
-                    ..default()
-                },
+        commands.spawn(SpriteSheetBundle {
+            texture_atlas: texture_atlas_handle.clone(),
+            transform: Transform {
+                scale: Vec3::new(SCALE, SCALE, 0.),
                 ..default()
-            })
-            .insert(GroundTile::Grass);
-        }
-    }
+            },
+            sprite: TextureAtlasSprite {
+                index: 0,
+                ..default()
+            },
+            ..default()
+        })
+        .insert(GroundTile::Grass);
 }
