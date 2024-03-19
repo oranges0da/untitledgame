@@ -93,12 +93,18 @@ fn spawn_idle_item(
     asset_server: Res<AssetServer>,
     item_res: Res<Items>,
 ) {
+    const SCALE: f32 = 2.;
+
     let Some(ice_cream_item) = item_res.get("ice_cream".to_string()) else { return; };
 
     commands.spawn(
         SpriteBundle {
             texture: asset_server.load(ice_cream_item.icon_path.to_string()),
-            transform: Transform::from_translation(Vec3::new(100., -200., 0.)),
+            transform: Transform {
+                translation: Vec3::new(100., -200., 0.),
+                scale: Vec3::new(SCALE, SCALE, 0.),
+                ..default()
+            },
                 ..default()
         }
     )

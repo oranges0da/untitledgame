@@ -47,7 +47,7 @@ fn spawn_map(
             commands.spawn(SpriteSheetBundle {
                 texture_atlas: texture_atlas_handle.clone(),
                 transform: Transform {
-                    translation: Vec3::new(SCALED_TILE_SIZE + x_offset - outer_x_offset, -SCALED_TILE_SIZE - y_offset - outer_x_offset, 0.),
+                    translation: Vec3::new(SCALED_TILE_SIZE + x_offset - outer_x_offset, -SCALED_TILE_SIZE - y_offset - outer_x_offset, -1.),
                     scale: Vec3::new(SCALE, SCALE, 0.),
                     ..default()
                 },

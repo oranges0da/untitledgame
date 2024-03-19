@@ -60,6 +60,8 @@ impl PlayerAnimations {
 // Initialize a Bevy resource for player's animations, and add each animation to resource.
 impl FromWorld for PlayerAnimations {
     fn from_world(_world: &mut World) -> Self {
+        const IDLE_FRAME_TIME: f32 = 0.15;
+
         let mut map = PlayerAnimations {
             map: HashMap::new(),
         };
@@ -68,7 +70,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Idle(Direction::South),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.13,
+                frame_time: IDLE_FRAME_TIME,
                 path: "player/idle/idle_south".to_string(),
             },
         );
@@ -76,8 +78,8 @@ impl FromWorld for PlayerAnimations {
         map.add(
             PlayerAnimationType::Idle(Direction::SouthWest),
             PlayerAnimation {
-                len: 4,
-                frame_time: 0.1,
+                len: 3,
+                frame_time: IDLE_FRAME_TIME,
                 path: "player/idle/idle_southwest".to_string(),
             },
         );
@@ -86,7 +88,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Idle(Direction::West),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: IDLE_FRAME_TIME,
                 path: "player/idle/idle_west".to_string(),
             },
         );
@@ -95,7 +97,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Idle(Direction::NorthWest),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: IDLE_FRAME_TIME,
                 path: "player/idle/idle_northwest".to_string(),
             },
         );
@@ -104,7 +106,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Idle(Direction::North),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: IDLE_FRAME_TIME,
                 path: "player/idle/idle_north".to_string(),
             },
         );
@@ -113,7 +115,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Idle(Direction::NorthEast),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: IDLE_FRAME_TIME,
                 path: "player/idle/idle_northeast".to_string(),
             },
         );
@@ -122,7 +124,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Idle(Direction::East),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: IDLE_FRAME_TIME,
                 path: "player/idle/idle_east".to_string(),
             },
         );
@@ -131,7 +133,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Idle(Direction::SouthEast),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: IDLE_FRAME_TIME,
                 path: "player/idle/idle_southeast".to_string(),
             },
         );
@@ -219,11 +221,12 @@ fn animate_player(
     animation_res: Res<PlayerAnimations>,
 ) {
     for (mut player, mut sprite) in player_query.iter_mut() {
+        player.frame_time += time.delta_seconds();
+
         let Some(animation) = animation_res.get(player.animation) else {
             return;
         };
 
-        player.frame_time += time.delta_seconds();
         if player.frame_time > animation.frame_time {
             let frames_elapsed = player.frame_time / animation.frame_time;
 
@@ -268,8 +271,7 @@ fn change_player_animation(
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
     let texture_handle = asset_server.load(path);
-    let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(500., 500.), 6, 1, None, None);
+    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(500., 500.), 6, 1, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     // Set player's spritesheet to relevant data.
