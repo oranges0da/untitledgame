@@ -7,6 +7,6 @@
     <img src="https://img.itch.zone/aW1nLzc5MTU5MjMuZ2lm/original/gNdKjy.gif" />
 </p>
 
-## Made with [Rust](https://rust-lang.org) and [Bevy](https://bevyengine.org), as well as [Rapier](https://rapier.rs) for physics.
+## Made with [Bevy](https://bevyengine.org).
 
 ### Protagonist art cred [here.](https://pixivan.itch.io/red-sprite-4-directional-free-version).
