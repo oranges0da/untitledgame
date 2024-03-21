@@ -61,6 +61,7 @@ impl PlayerAnimations {
 impl FromWorld for PlayerAnimations {
     fn from_world(_world: &mut World) -> Self {
         const IDLE_FRAME_TIME: f32 = 0.15;
+        const WALK_FRAME_TIME: f32 = 0.08;
 
         let mut map = PlayerAnimations {
             map: HashMap::new(),
@@ -142,7 +143,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(Direction::South),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: WALK_FRAME_TIME,
                 path: "player/walk/walk_south".to_string(),
             },
         );
@@ -151,7 +152,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(Direction::SouthWest),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: WALK_FRAME_TIME,
                 path: "player/walk/walk_southwest".to_string(),
             },
         );
@@ -160,7 +161,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(Direction::West),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: WALK_FRAME_TIME,
                 path: "player/walk/walk_west".to_string(),
             },
         );
@@ -169,7 +170,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(Direction::NorthWest),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: WALK_FRAME_TIME,
                 path: "player/walk/walk_northwest".to_string(),
             },
         );
@@ -178,7 +179,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(Direction::North),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: WALK_FRAME_TIME,
                 path: "player/walk/walk_north".to_string(),
             },
         );
@@ -187,7 +188,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(Direction::NorthEast),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: WALK_FRAME_TIME,
                 path: "player/walk/walk_northeast".to_string(),
             },
         );
@@ -196,7 +197,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(Direction::East),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: WALK_FRAME_TIME,
                 path: "player/walk/walk_east".to_string(),
             },
         );
@@ -205,7 +206,7 @@ impl FromWorld for PlayerAnimations {
             PlayerAnimationType::Walk(Direction::SouthEast),
             PlayerAnimation {
                 len: 6,
-                frame_time: 0.1,
+                frame_time: WALK_FRAME_TIME,
                 path: "player/walk/walk_southeast".to_string(),
             },
         );
@@ -267,6 +268,7 @@ fn change_player_animation(
     let Some(new_animation) = animation_res.get(animation_id) else {
         return;
     };
+
     let path = format!("{}.png", &new_animation.path);
 
     // Load player spritesheet according to relevant path, and splice into single frames. (Why is this so tedious in Bevy?)
