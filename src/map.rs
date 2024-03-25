@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::{BufReader};
 
 #[derive(Component)]
 pub struct MapPlugin;
@@ -23,11 +26,11 @@ fn spawn_map(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     const TILE_SIZE: f32 = 16.; // Size of single tile in tileset.
-    const SCALE: f32 = 3.;
+    const SCALE: f32 = 4.;
     const SCALED_TILE_SIZE: f32 = SCALE * TILE_SIZE;
     const MAP_SIZE: i32 = 20;
 
-    // Spawn rock.
+    // Cut out rock sprite.
     let texture_handle = asset_server.load("map/rock_tiles.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
@@ -37,24 +40,9 @@ fn spawn_map(
         None,
         None,
     );
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let rock_texture = texture_atlases.add(texture_atlas);
 
-    commands.spawn(SpriteSheetBundle {
-        texture_atlas: texture_atlas_handle.clone(),
-        transform: Transform {
-            translation: Vec3::new(0., 0., 0.9),
-            scale: Vec3::new(SCALE, SCALE, 0.),
-            ..default()
-        },
-        sprite: TextureAtlasSprite {
-            index: 0,
-            ..default()
-        },
-        ..default()
-    })
-    .insert(GroundTile::Rock);
-
-    // Spawn map.
+    // Cut out grass tile.
     let texture_handle = asset_server.load("map/tiles.png");
     let texture_atlas = TextureAtlas::from_grid(
         texture_handle,
@@ -64,24 +52,49 @@ fn spawn_map(
         None,
         None,
     );
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let tile_texture = texture_atlases.add(texture_atlas);
 
-    for y in 0..MAP_SIZE {
-        for x in 0..MAP_SIZE {
+    // Open level file.
+    let mut file = File::open("assets/map/level.txt").unwrap();
+    let reader = BufReader::new(file);
+
+    let mut x: f32 = 0.;
+    let mut y: f32 = 0.;
+
+    for line in reader.lines() {
+        y += 1.;
+        x = 0.;
+        for char in line.expect("Failed to get line for map.").chars() {
+            x += 1.;
             commands.spawn(SpriteSheetBundle {
-                texture_atlas: texture_atlas_handle.clone(),
-                transform: Transform {
-                    scale: Vec3::new(SCALE, SCALE, 0.),
-                    translation: Vec3::new(SCALED_TILE_SIZE * x as f32, SCALED_TILE_SIZE * y as f32, 0.8),
+                texture_atlas: tile_texture.clone(),
+                sprite: TextureAtlasSprite {
+                    index: 122,
                     ..default()
                 },
-                sprite: TextureAtlasSprite {
-                    index: 11,
+                transform: Transform {
+                    translation: Vec3::new(SCALED_TILE_SIZE * x, SCALED_TILE_SIZE * y, 0.),
+                    scale: Vec3::new(SCALE, SCALE, 0.),
                     ..default()
                 },
                 ..default()
-            })
-            .insert(GroundTile::Grass);
+            });
+
+            if char == '1' {
+                commands.spawn(SpriteSheetBundle {
+                    texture_atlas: rock_texture.clone(),
+                    sprite: TextureAtlasSprite {
+                        index: 0,
+                        ..default()
+                    },
+                    transform: Transform {
+                        translation: Vec3::new(SCALED_TILE_SIZE * x, SCALED_TILE_SIZE * y, 0.9),
+                        scale: Vec3::new(SCALE, SCALE, 0.),
+                        ..default()
+                    },
+                    ..default()
+                });
+            }
         }
     }
 }

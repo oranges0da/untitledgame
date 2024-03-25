@@ -36,5 +36,6 @@ fn main() {
     app.add_plugins(mouse::MousePlugin);
     app.add_plugins(player::PlayerPlugin);
     app.add_plugins(animation::AnimationPlugin);
+
     app.run();
 }
