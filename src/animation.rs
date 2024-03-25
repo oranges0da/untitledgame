@@ -217,31 +217,33 @@ impl FromWorld for PlayerAnimations {
 
 // Animation logic for animating player.
 fn animate_player(
-    mut player_query: Query<(&mut Player, &mut TextureAtlasSprite), With<Player>>,
+    mut player_q: Query<&mut Player>,
+    mut sprite_q: Query<&mut TextureAtlasSprite, With<Player>>,
     time: Res<Time>,
     animation_res: Res<PlayerAnimations>,
 ) {
-    for (mut player, mut sprite) in player_query.iter_mut() {
-        player.frame_time += time.delta_seconds();
+    let mut player = player_q.single_mut();
+    let mut sprite = sprite_q.single_mut();
 
-        let Some(animation) = animation_res.get(player.animation) else {
-            return;
-        };
+    player.frame_time += time.delta_seconds();
 
-        if player.frame_time > animation.frame_time {
-            let frames_elapsed = player.frame_time / animation.frame_time;
+    let Some(animation) = animation_res.get(player.animation) else {
+        return;
+    };
 
-            // Animate!
-            sprite.index += frames_elapsed as usize;
+    if player.frame_time > animation.frame_time {
+        let frames_elapsed = player.frame_time / animation.frame_time;
 
-            // If sprite index becomes greater than length of total animation frames, reset sprite index. (Restart animation)
-            if sprite.index >= animation.len {
-                sprite.index %= animation.len;
-            }
+        // Animate!
+        sprite.index += frames_elapsed as usize;
 
-            // Subtract total frames from frame_time as to not accumulate in frame_time.
-            player.frame_time -= animation.frame_time * frames_elapsed as f32;
+        // If sprite index becomes greater than length of total animation frames, reset sprite index. (Restart animation)
+        if sprite.index >= animation.len {
+            sprite.index %= animation.len;
         }
+
+        // Subtract total frames from frame_time as to not accumulate in frame_time.
+        player.frame_time -= animation.frame_time * frames_elapsed as f32;
     }
 }
 
