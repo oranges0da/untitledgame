@@ -47,7 +47,11 @@ fn player_movement(
     keyboard_input: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    const SPEED: f32 = 250.;
+    let mut SPEED: f32 = 250.;
+
+    if keyboard_input.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+        SPEED *= 2.;
+    }
 
     let (mut player, mut pos) = player_q.single_mut();
     let mut direction = Vec3::ZERO;
