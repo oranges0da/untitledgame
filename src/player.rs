@@ -77,7 +77,6 @@ fn player_movement(
     pos.translation += direction * SPEED * time.delta_seconds();
 }
 
-// TODO: Make this less hacky.
 fn set_player_direction(mut player_q: Query<&mut Player>, keyboard_input: Res<Input<KeyCode>>) {
     let mut player = player_q.single_mut();
 

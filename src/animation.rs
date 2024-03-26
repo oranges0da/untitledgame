@@ -21,6 +21,7 @@ impl Plugin for AnimationPlugin {
 pub enum PlayerAnimationType {
     Idle(Direction),
     Walk(Direction),
+    Run(Direction),
 }
 
 #[derive(Component, Eq, PartialEq, Hash, Clone, Copy, Debug)]
@@ -211,6 +212,78 @@ impl FromWorld for PlayerAnimations {
             },
         );
 
+        map.add(
+            PlayerAnimationType::Run(Direction::South),
+            PlayerAnimation {
+                len: 6,
+                frame_time: WALK_FRAME_TIME,
+                path: "player/run/run_south".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Run(Direction::SouthEast),
+            PlayerAnimation {
+                len: 6,
+                frame_time: WALK_FRAME_TIME,
+                path: "player/run/run_southeast".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Run(Direction::SouthWest),
+            PlayerAnimation {
+                len: 6,
+                frame_time: WALK_FRAME_TIME,
+                path: "player/run/run_southwest".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Run(Direction::North),
+            PlayerAnimation {
+                len: 6,
+                frame_time: WALK_FRAME_TIME,
+                path: "player/run/run_north".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Run(Direction::NorthWest),
+            PlayerAnimation {
+                len: 6,
+                frame_time: WALK_FRAME_TIME,
+                path: "player/run/run_northwest".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Run(Direction::NorthEast),
+            PlayerAnimation {
+                len: 6,
+                frame_time: WALK_FRAME_TIME,
+                path: "player/run/run_northeast".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Run(Direction::East),
+            PlayerAnimation {
+                len: 6,
+                frame_time: WALK_FRAME_TIME,
+                path: "player/run/run_east".to_string(),
+            },
+        );
+
+        map.add(
+            PlayerAnimationType::Run(Direction::West),
+            PlayerAnimation {
+                len: 6,
+                frame_time: WALK_FRAME_TIME,
+                path: "player/run/run_west".to_string(),
+            },
+        );
+
         map
     }
 }
@@ -260,7 +333,11 @@ fn change_player_animation(
     let mut player = player_q.single_mut();
     let mut atlas = texture_atlas_query.single_mut();
 
-    let animation_id = if keyboard_input.any_pressed([KeyCode::W, KeyCode::D, KeyCode::S, KeyCode::A, KeyCode::Up, KeyCode::Right, KeyCode::Left, KeyCode::Down]) {
+    let animation_id = if keyboard_input.any_pressed([KeyCode::W, KeyCode::D, KeyCode::S, KeyCode::A, KeyCode::Up, KeyCode::Right, KeyCode::Left, KeyCode::Down])
+        && keyboard_input.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+            PlayerAnimationType::Run(player.direction.clone())
+        }
+    else if keyboard_input.any_pressed([KeyCode::W, KeyCode::D, KeyCode::S, KeyCode::A, KeyCode::Up, KeyCode::Right, KeyCode::Left, KeyCode::Down]) {
         PlayerAnimationType::Walk(player.direction.clone())
     } else {
         PlayerAnimationType::Idle(player.direction.clone())
