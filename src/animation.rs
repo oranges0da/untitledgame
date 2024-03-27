@@ -10,7 +10,7 @@ impl Plugin for AnimationPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<PlayerAnimations>()
             .add_systems(Update, animate_player)
-            .add_systems(Update, change_player_animation)
+            .add_systems(Update, update_player_animation)
             .add_systems(Update, animate_item_idle)
             .add_systems(Update, animate_item_in_inv);
     }
@@ -320,8 +320,7 @@ fn animate_player(
     }
 }
 
-// Change current player animation and spritesheet according to specified logic.
-fn change_player_animation(
+fn update_player_animation(
     mut player_q: Query<&mut Player>,
     item_q: Query<&mut Item>,
     keyboard_input: Res<Input<KeyCode>>,

@@ -18,7 +18,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
             .add_systems(Update, player_movement)
-            .add_systems(Update, set_player_direction);
+            .add_systems(Update, update_player_direction);
     }
 }
 
@@ -81,7 +81,7 @@ fn player_movement(
     pos.translation += direction * SPEED * time.delta_seconds();
 }
 
-fn set_player_direction(mut player_q: Query<&mut Player>, keyboard_input: Res<Input<KeyCode>>) {
+fn update_player_direction(mut player_q: Query<&mut Player>, keyboard_input: Res<Input<KeyCode>>) {
     let mut player = player_q.single_mut();
 
     if keyboard_input.any_pressed([KeyCode::A, KeyCode::Left]) && keyboard_input.any_pressed([KeyCode::W, KeyCode::Up])
