@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy::window::PresentMode;
+use bevy::window::*;
 
 mod animation;
 mod camera;
@@ -24,6 +24,10 @@ fn main() {
                         fit_canvas_to_parent: true,
                         // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
                         prevent_default_event_handling: false,
+                        cursor: Cursor {
+                            visible: false,
+                            ..default()
+                        },
                         ..default()
                     }),
                     ..default()
