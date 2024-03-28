@@ -1,5 +1,11 @@
-use bevy::prelude::*;
 use bevy::window::*;
+use bevy::{
+    input::{
+        mouse::{MouseButtonInput, MouseMotion, MouseWheel},
+        touchpad::{TouchpadMagnify, TouchpadRotate},
+    },
+    prelude::*,
+};
 
 #[derive(Component)]
 pub struct MousePlugin;
@@ -35,17 +41,21 @@ fn spawn_cursor(
 
 fn update_cursor(
     mut commands: Commands,
-    window_q: Query<&Window, With<PrimaryWindow>>,
+    mut window_q: Query<&mut Window, With<PrimaryWindow>>,
     mouse_entity_q: Query<Entity, With<Mouse>>,
     mut mouse_pos_q: Query<&mut Transform, With<Mouse>>,
+    mut mouse_events: EventReader<MouseMotion>,
 ) {
     let mouse_e = mouse_entity_q.single();
     let mut mouse_pos = mouse_pos_q.single_mut();
+    let mut window = window_q.single_mut();
 
-    if let Some(cursor_position) = window_q.single().cursor_position() {
-       mouse_pos.translation.x = cursor_position.x;
-       mouse_pos.translation.y = -cursor_position.y;
-    } else {
-        println!("Cursor is not in the game window.");
+    // Lock cursor.
+    window.cursor.grab_mode = CursorGrabMode::Locked;
+
+    // Update cursor sprite position with mouse position change.
+    for ev in mouse_events.iter() {
+        mouse_pos.translation.x += ev.delta.x;
+        mouse_pos.translation.y += -ev.delta.y;
     }
 }
